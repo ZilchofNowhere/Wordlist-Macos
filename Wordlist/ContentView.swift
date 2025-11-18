@@ -9,12 +9,14 @@ enum SidebarItem: Hashable, Identifiable {
     case home
     case about
     case tag(TagCategory)
+    case manageTags
 
     var id: String {
         switch self {
-        case .home: return "home"
-        case .about: return "about"
-        case .tag(let cat): return cat.rawValue
+            case .home: return "home"
+            case .about: return "about"
+            case .tag(let cat): return cat.rawValue
+            case .manageTags: return "manageTags"
         }
     }
 
@@ -46,6 +48,9 @@ struct ContentView: View {
 
                 // TAGS SECTION
                 Section("Tags") {
+                    NavigationLink(value: SidebarItem.manageTags) {
+                        Label("Manage tags", systemImage: "folder.badge.gearshape")
+                    }
                     ForEach(SidebarItem.TagCategory.allCases, id: \.self) { category in
                         NavigationLink(value: SidebarItem.tag(category)) {
                             Label(category.rawValue, systemImage: "tag")
@@ -68,6 +73,8 @@ struct ContentView: View {
                 TagCategoryView(category: category)
             case .about:
                 AboutView()
+            case .manageTags:
+                ManageTagsView()
             case .none:
                 Text("Select a page")
             }
@@ -103,6 +110,7 @@ struct ContentView: View {
             case .home: return "house"
             case .tag: return "tag"
             case .about: return "info.circle"
+            case .manageTags: return "folder.badge.gearshape"
         }
     }
 }
