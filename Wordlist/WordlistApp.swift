@@ -13,5 +13,9 @@ struct WordlistApp: App {
         WindowGroup {
             ContentView()
         }
+        Window("About Wordlist", id: "about") {
+            AboutView()
+                .frame(width: 350, height: 200)
+        }
     }
 }
