@@ -5,25 +5,31 @@
 //  Created by Arda Eren Kartal on 18.11.2025.
 //
 
-class Word {
-    let german: String
-    let english: String
-    let grammaticalType: GrammaticalType
-    let vocabTag: [VocabTag]
-    let notes: String?
+import SwiftUI
+import Combine
+
+class Word: Identifiable, ObservableObject {
+    let id = UUID()
+    @Published var german: String
+    @Published var english: String
+    @Published var grammaticalType: GrammaticalType
+    @Published var vocabTag: [VocabTag]?
+    @Published var notes: String?
+    @Published var exampleSentence: String?
     
-    init(german: String, english: String, grammaticalType: GrammaticalType, vocabTag: [VocabTag], notes: String?) {
+    init(german: String, english: String, grammaticalType: GrammaticalType, vocabTag: [VocabTag]? = nil, notes: String? = nil, exampleSentence: String? = nil) {
         self.german = german
         self.english = english
         self.grammaticalType = grammaticalType
         self.vocabTag = vocabTag
         self.notes = notes
+        self.exampleSentence = exampleSentence
     }
 }
 
 class Noun: Word {
-    let gender: Gender
-    let pluralForm: String?
+    @Published var gender: Gender
+    @Published var pluralForm: String?
     var article: String {
         switch gender {
             case .feminine: return "die"
@@ -33,36 +39,48 @@ class Noun: Word {
         }
     }
     
-    init(german: String, english: String, vocabTag: [VocabTag], notes: String?, gender: Gender, pluralForm: String?) {
+    init(german: String, english: String, vocabTag: [VocabTag]? = nil, notes: String? = nil, exampleSentence: String? = nil, gender: Gender, pluralForm: String?) {
         self.gender = gender
         self.pluralForm = pluralForm
-        super.init(german: german, english: english, grammaticalType: .noun, vocabTag: vocabTag, notes: notes)
+        super.init(german: german, english: english, grammaticalType: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence)
     }
 }
 
 class Verb: Word {
-    let isRegular: Bool
-    let isSeparable: Bool
-    let present: String?
-    let imperfect: String?
-    let pastParticiple: String?
+    @Published var isRegular: Bool
+    @Published var isSeparable: Bool
+    @Published var present: String?
+    @Published var imperfect: String?
+    @Published var pastParticiple: String?
+    @Published var auxiliary: String
     
-    init(german: String, english: String, vocabTag: [VocabTag], notes: String?, isRegular: Bool = true, isSeparable: Bool = true, present: String?, imperfect: String?, pastParticiple: String?) {
+    init(german: String, english: String, vocabTag: [VocabTag]? = nil, notes: String? = nil, exampleSentence: String? = nil, isRegular: Bool = true, isSeparable: Bool = false, present: String? = nil, imperfect: String? = nil, pastParticiple: String? = nil, auxiliary: String = "haben") {
         self.isRegular = isRegular
         self.isSeparable = isSeparable
         self.present = present
         self.imperfect = imperfect
         self.pastParticiple = pastParticiple
-        super.init(german: german, english: english, grammaticalType: .verb, vocabTag: vocabTag, notes: notes)
+        self.auxiliary = auxiliary
+        super.init(german: german, english: english, grammaticalType: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence)
     }
 }
 
 class Adjective: Word {
-    var comparativeForm: String?
+    @Published var isRegular: Bool
+    @Published var comparativeForm: String?
     
-    init(german: String, english: String, vocabTag: [VocabTag], notes: String?, comparativeForm: String? = nil) {
+    init(german: String, english: String, vocabTag: [VocabTag]? = nil, notes: String? = nil, exampleSentence: String? = nil, isRegular: Bool = true, comparativeForm: String? = nil) {
+        self.isRegular = isRegular
         self.comparativeForm = comparativeForm
-        super.init(german: german, english: english, grammaticalType: .adjective, vocabTag: vocabTag, notes: notes)
+        super.init(german: german, english: english, grammaticalType: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence)
     }
 }
 
+class Preposition: Word {
+    @Published var nounCase: String
+    
+    init(german: String, english: String, vocabTag: [VocabTag]? = nil, notes: String? = nil, exampleSentence: String? = nil, nounCase: String) {
+        self.nounCase = nounCase
+        super.init(german: german, english: english, grammaticalType: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence)
+    }
+}

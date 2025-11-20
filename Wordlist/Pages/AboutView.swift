@@ -13,10 +13,11 @@ struct AboutView: View {
         VStack(spacing: 12) {
             Image(nsImage: NSApp.applicationIconImage)
                 .resizable()
+                .aspectRatio(contentMode: .fit)
                 .frame(width: 72, height: 72)
                 .cornerRadius(16)
 
-            Text("MyApp")
+            Text("Wordlist")
                 .font(.title2)
                 .bold()
 
@@ -28,6 +29,7 @@ struct AboutView: View {
                 .foregroundColor(.secondary)
         }
         .padding()
+        .frame(width: 350, height: 200)
     }
 
     var appVersion: String {

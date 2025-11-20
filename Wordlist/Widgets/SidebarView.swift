@@ -22,9 +22,6 @@ struct SidebarView: View {
 
             // TAGS SECTION
             Section("Tags") {
-                NavigationLink(value: SidebarItem.manageTags) {
-                    Label("Manage tags", systemImage: "folder.badge.gearshape")
-                }
                 DisclosureGroup(isExpanded: $isTagsOnSidebarExtended) {
                     ForEach(GrammaticalType.allCases, id: \.self) { category in
                         NavigationLink(value: SidebarItem.tag(category)) {
@@ -37,8 +34,8 @@ struct SidebarView: View {
             }
             
             Section {
-                NavigationLink(value: SidebarItem.about) {
-                    Label("About", systemImage: "info.circle")
+                NavigationLink(value: SidebarItem.quiz) {
+                    Label("Quiz", systemImage: "graduationcap")
                 }
             }
         }

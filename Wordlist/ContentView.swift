@@ -8,84 +8,78 @@
 enum SidebarItem: Hashable, Identifiable {
     case home
     case about
-    case tag(TagCategory)
-    case manageTags
+    case tag(GrammaticalType)
+    case quiz
 
     var id: String {
         switch self {
             case .home: return "home"
             case .about: return "about"
             case .tag(let cat): return cat.rawValue
-            case .manageTags: return "manageTags"
+            case .quiz: return "quiz"
         }
-    }
-
-    enum TagCategory: String, CaseIterable {
-        case nouns = "Nouns"
-        case verbs = "Verbs"
-        case adjectives = "Adjectives"
-        case adverbs = "Adverbs"
-        case pronouns = "Pronouns"
     }
 }
 
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var store: WordStore
+
     @State private var selection: SidebarItem? = .home
     @State private var query = ""
     @State private var selectedSegment = 0
+    @State private var isAddWordViewOpen = false
+    @State private var selectedWordId: UUID?
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selection) {
-                // Main section
-                Section {
-                    NavigationLink(value: SidebarItem.home) {
-                        Label("Home", systemImage: "house")
-                    }
-                }
-
-                // TAGS SECTION
-                Section("Tags") {
-                    NavigationLink(value: SidebarItem.manageTags) {
-                        Label("Manage tags", systemImage: "folder.badge.gearshape")
-                    }
-                    ForEach(SidebarItem.TagCategory.allCases, id: \.self) { category in
-                        NavigationLink(value: SidebarItem.tag(category)) {
-                            Label(category.rawValue, systemImage: "tag")
-                        }
-                    }
-                }
-                
-                Section {
-                    NavigationLink(value: SidebarItem.about) {
-                        Label("About", systemImage: "info.circle")
-                    }
-                }
-            }
-                .listStyle(.sidebar)
+            SidebarView(selection: $selection)
+                .frame(minWidth: 180)
         } detail: {
             switch selection {
-            case .home:
-                HomeView()
-            case .tag(let category):
-                TagCategoryView(category: category)
-            case .about:
-                AboutView()
-            case .manageTags:
-                ManageTagsView()
-            case .none:
-                Text("Select a page")
+                case .home:
+                    HomeView(selectedWordId: $selectedWordId)
+                case .tag(let category):
+                    TagCategoryView(category: category, selectedWordId: $selectedWordId)
+                case .about:
+                    AboutView()
+                case .quiz:
+                    QuizView()
+                case .none:
+                    Text("Select a page")
             }
         }
+        .inspector(isPresented: Binding(
+            get: { selectedWordId != nil }, // Show if something is selected
+            set: { if !$0 { selectedWordId = nil } } // Deselect if closed
+        )) {
+            if let id = selectedWordId, let word = store.words.first(where: { $0.id == id }) {
+                EditWordView(word: word)
+                    .inspectorColumnWidth(min: 250, ideal: 300)
+            } else {
+                ContentUnavailableView("No Selection", systemImage: "cursorarrow.click")
+                    .frame(minWidth: 250, idealWidth: 300)
+            }
+        }
+        .inspector(isPresented: Binding(get: {isAddWordViewOpen && selectedWordId == nil}, set: { if !$0 {isAddWordViewOpen = false}})) {
+            AddWordView()
+        }
         .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    isAddWordViewOpen.toggle()
+                } label: {
+                    Image(systemName: "plus")
+                }
+                .help("Add a new word")
+            }
             ToolbarItem(placement: .automatic) {
                 HStack {
                     TextField("Words…", text: $query)
                         .textFieldStyle(.roundedBorder)
-                        .frame(width: 220)
-
+                        .frame(width: 200)
+                    
                     // 2) FILTER BUTTON
                     Button {
                         // filter by word or by tag
@@ -97,20 +91,25 @@ struct ContentView: View {
             }
             ToolbarItem(placement: .automatic) {
                 Button {
-                    // either add a new word or a new tag
+                    if selectedWordId != nil {
+                        $selectedWordId.wrappedValue = nil
+                    }
                 } label: {
-                    Image(systemName: "plus")
+                    Image(systemName: "sidebar.right")
                 }
+                .help("Hide the sidebar")
             }
         }
+        
     }
+        
     
     func icon(for item: SidebarItem) -> String {
         switch item {
             case .home: return "house"
             case .tag: return "tag"
             case .about: return "info.circle"
-            case .manageTags: return "folder.badge.gearshape"
+            case .quiz: return "graduationcap"
         }
     }
 }

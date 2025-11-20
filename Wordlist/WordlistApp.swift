@@ -9,13 +9,25 @@ import SwiftUI
 
 @main
 struct WordlistApp: App {
+    @StateObject var store = WordStore()
+    @Environment(\.openWindow) var openWindow
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(store)
         }
-        Window("About Wordlist", id: "about") {
+        .commands {
+            CommandGroup(replacing: .appInfo) {
+                Button("About Wordlist") {
+                    openWindow(id: "about-app")
+                }
+            }
+        }
+        Window("About Wordlist", id: "about-app") {
             AboutView()
-                .frame(width: 350, height: 200)
         }
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
     }
 }
