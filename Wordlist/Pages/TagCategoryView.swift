@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct TagCategoryView: View {
-    let category: SidebarItem.TagCategory
+    let category: GrammaticalType
 
     var body: some View {
         Text(category.rawValue)
