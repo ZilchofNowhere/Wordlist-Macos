@@ -6,19 +6,11 @@
 //
 
 private let wordlist = [
-    Noun(german: "Auto", english: "car", gender: .neuter, pluralForm: "Autos"),
-    Verb(german: "laufen", english: "to walk", isRegular: false, present: "läuft", imperfect: "lief", pastParticiple: "gelaufen", auxiliary: "sein"),
-    Adjective(german: "lang", english: "long", isRegular: false, comparativeForm: "länger"),
-    Noun(german: "Haus", english: "house", gender: .neuter, pluralForm: "Häuser"),
-    Noun(german: "Kuh", english: "cow", vocabTag: [.animal], gender: .feminine, pluralForm: "Kühe"),
-    Noun(german: "Stadt", english: "city", gender: .feminine, pluralForm: "Städte"),
-    Verb(german: "heiraten", english: "to marry")
+    Word(german: "Auto", english: "car", type: .noun, gender: .neuter, pluralForm: "Autos"),
+    Word(german: "laufen", english: "to walk", type: .verb, isRegular: false, present: "läuft", imperfect: "lief", pastParticiple: "gelaufen", auxiliary: "sein"),
+    Word(german: "lang", english: "long", type: .adjective, isRegular: false, comparativeForm: "länger"),
+    Word(german: "Haus", english: "house", type: .noun, vocabTag: [.house], gender: .neuter, pluralForm: "Häuser"),
+    Word(german: "Kuh", english: "cow", type: .noun, vocabTag: [.animal], gender: .feminine, pluralForm: "Kühe"),
+    Word(german: "Stadt", english: "city", type: .noun, vocabTag: [.city], gender: .feminine, pluralForm: "Städte"),
+    Word(german: "heiraten", english: "to marry", type: .verb, vocabTag: [.family])
 ]
-
-extension WordStore {
-    func loadSampleData() {
-        for word in wordlist {
-            self.addWord(word)
-        }
-    }
-}

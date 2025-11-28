@@ -8,19 +8,20 @@
 import SwiftUI
 
 struct WordCard: View {
+    @EnvironmentObject var store: WordStore
     var word: Word
     var isSelected: Bool
     
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 6)
-                .fill(.background)
+                .fill(Color.clear)
             
             VStack {
-                if let noun = word as? Noun {
+                if word.type == .noun {
                     Text(verbatim: { () -> String in
-                        var base = "\(noun.article) \(noun.german)"
-                        if let plural = noun.pluralForm, !plural.isEmpty {
+                        var base = "\(word.article) \(word.german)"
+                        if let plural = word.pluralForm, !plural.isEmpty {
                             base += ", \(plural)"
                         }
                         return base
@@ -40,6 +41,19 @@ struct WordCard: View {
             }
             .padding(20)
             .multilineTextAlignment(.center)
+        }
+        .contextMenu {
+            Button {
+                store.addWord(word)
+            } label: {
+                Label("Duplicate", systemImage: "document.on.document")
+            }
+            
+            Button(role: .destructive) {
+                store.delete(word)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
         }
         .frame(height: 150)
     }

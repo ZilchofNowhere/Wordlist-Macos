@@ -1,1 +1,2 @@
+add a toCSV function to Word class that will be overridden by child classes
 add image capability when everything basic is completed

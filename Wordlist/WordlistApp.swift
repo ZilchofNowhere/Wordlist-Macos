@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct WordlistApp: App {
@@ -15,8 +16,8 @@ struct WordlistApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(store)
         }
+        .modelContainer(for: Word.self)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About Wordlist") {

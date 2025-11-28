@@ -21,16 +21,24 @@ enum SidebarItem: Hashable, Identifiable {
     }
 }
 
+enum InspectorMode: Equatable {
+    case none
+    case addWord
+    case editWord(Word)
+}
+
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @EnvironmentObject var store: WordStore
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \Word.german) private var words: [Word]
 
     @State private var selection: SidebarItem? = .home
     @State private var query = ""
     @State private var selectedSegment = 0
-    @State private var isAddWordViewOpen = false
     @State private var selectedWordId: UUID?
+    @State private var inspectorMode: InspectorMode = .none
 
     var body: some View {
         NavigationSplitView {
@@ -50,54 +58,72 @@ struct ContentView: View {
                     Text("Select a page")
             }
         }
+        .searchable(text: $query, prompt: "Search words...")
         .inspector(isPresented: Binding(
-            get: { selectedWordId != nil }, // Show if something is selected
-            set: { if !$0 { selectedWordId = nil } } // Deselect if closed
+            get: { inspectorMode != .none },
+            set: { if !$0 { inspectorMode = .none }}
         )) {
-            if let id = selectedWordId, let word = store.words.first(where: { $0.id == id }) {
-                EditWordView(word: word)
-                    .inspectorColumnWidth(min: 250, ideal: 300)
-            } else {
-                ContentUnavailableView("No Selection", systemImage: "cursorarrow.click")
-                    .frame(minWidth: 250, idealWidth: 300)
+            Group {
+                switch inspectorMode {
+                    case .none:
+                        EmptyView()
+                    case .addWord:
+                        AddWordView()
+                    case .editWord(let word):
+                        EditWordView(word: word)
+                }
             }
         }
-        .inspector(isPresented: Binding(get: {isAddWordViewOpen && selectedWordId == nil}, set: { if !$0 {isAddWordViewOpen = false}})) {
-            AddWordView()
+        .onChange(of: selectedWordId) { oldValue, newValue in
+            guard let newId = newValue else {
+                if case .editWord = inspectorMode {
+                    inspectorMode = .none
+                }
+                return
+            }
+            
+            if let editedWord = words.first(where: { $0.id == newId }) {
+                inspectorMode = .editWord(editedWord)
+            }
         }
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
-                    isAddWordViewOpen.toggle()
+                    if (inspectorMode != .addWord) {
+                        inspectorMode = .addWord
+                    } else {
+                        inspectorMode = .none
+                    }
                 } label: {
                     Image(systemName: "plus")
                 }
                 .help("Add a new word")
             }
             ToolbarItem(placement: .automatic) {
-                HStack {
-                    TextField("Words…", text: $query)
-                        .textFieldStyle(.roundedBorder)
-                        .frame(width: 200)
-                    
-                    // 2) FILTER BUTTON
-                    Button {
-                        // filter by word or by tag
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                    }
-                    .help("Filter")
-                }
-            }
-            ToolbarItem(placement: .automatic) {
                 Button {
-                    if selectedWordId != nil {
-                        $selectedWordId.wrappedValue = nil
+                    if selectedWordId == nil {
+                        if inspectorMode == .none {
+                            inspectorMode = .addWord
+                        } else {
+                            inspectorMode = .none
+                        }
+                    } else {
+                        if inspectorMode != .none && inspectorMode != .addWord {
+                            inspectorMode = .none
+                        } else {
+                            let editedWord = words.first(where: { $0.id == $selectedWordId.wrappedValue! })
+                            if editedWord == nil {
+                                inspectorMode = .addWord
+                                selectedWordId = nil
+                            } else {
+                                inspectorMode = .editWord(editedWord!)
+                            }
+                        }
                     }
                 } label: {
                     Image(systemName: "sidebar.right")
                 }
-                .help("Hide the sidebar")
+                .help("Toggle the sidebar")
             }
         }
         

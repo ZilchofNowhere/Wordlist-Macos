@@ -13,7 +13,7 @@ struct AddWordView: View {
     
     @State private var german: String = ""
     @State private var english: String = ""
-    @State private var grammaticalType: GrammaticalType = .noun
+    @State private var wordType: GrammaticalType = .noun
     @State private var notes: String = ""
     @State private var exampleSentence: String = ""
     @State private var vocabTag: [VocabTag] = []
@@ -40,7 +40,7 @@ struct AddWordView: View {
         Form {
             Section("Word") {
                 // 1. Choose Type
-                Picker("Word Type", selection: $grammaticalType) {
+                Picker("Word Type", selection: $wordType) {
                     ForEach(GrammaticalType.allCases) { type in
                         Text(type.rawValue).tag(type)
                     }
@@ -73,67 +73,73 @@ struct AddWordView: View {
             }
             
             // 3. Dynamic Fields based on selection
-            Section("Details") {
-                if grammaticalType == .noun {
-                    Picker("Gender", selection: $gender) {
-                        ForEach(Gender.allCases) { gender in
-                            Text(gender.rawValue).tag(gender)
+            if [.noun, .verb, .adjective, .preposition].contains(where: { $0 == wordType }) {
+                Section("Details") {
+                    if wordType == .noun {
+                        Picker("Gender", selection: $gender) {
+                            ForEach(Gender.allCases) { gender in
+                                Text(gender.rawValue).tag(gender)
+                            }
                         }
-                    }
-                    if (gender != .plural) {
-                        TextField(text: $pluralForm) {
-                            Text("Plural form")
+                        if (gender != .plural) {
+                            TextField(text: $pluralForm) {
+                                Text("Plural form")
+                            }
+                                .textFieldStyle(.squareBorder)
                         }
-                            .textFieldStyle(.squareBorder)
-                    }
-                    
-                } else if grammaticalType == .verb {
-                    Toggle("Is separable", isOn: $isSeparable)
-                    Toggle("Is regular", isOn: $isRegular)
-                    if (!isRegular) {
-                        TextField(text: $present) {
-                            Text("Present form")
-                        }
-                            .textFieldStyle(.squareBorder)
+                        
+                    } else if wordType == .verb {
+                        Toggle("Is separable", isOn: $isSeparable).toggleStyle(.checkbox)
+                        Toggle("Is regular", isOn: $isRegular).toggleStyle(.checkbox)
+                        if (!isRegular) {
+                            TextField(text: $present) {
+                                Text("Present form")
+                            }
+                                .textFieldStyle(.squareBorder)
 
-                        TextField(text: $imperfect) {
-                            Text("Imperfect form")
-                        }
-                            .textFieldStyle(.squareBorder)
+                            TextField(text: $imperfect) {
+                                Text("Imperfect form")
+                            }
+                                .textFieldStyle(.squareBorder)
 
-                        TextField(text: $pastParticiple) {
-                            Text("Past participle form")
-                        }
-                            .textFieldStyle(.squareBorder)
+                            TextField(text: $pastParticiple) {
+                                Text("Past participle form")
+                            }
+                                .textFieldStyle(.squareBorder)
 
-                    }
-                    Picker("Auxiliary verb", selection: $auxiliary) {
-                        ForEach(["haben", "sein"], id: \.self) { aux in
-                            Text(aux).tag(aux)
                         }
-                    }
-                    
-                } else if grammaticalType == .adjective {
-                    Toggle("Is regular", isOn: $isRegular)
-                    if (!isRegular) {
-                        TextField(text: $comparative) {
-                            Text("Comparative form")
+                        Picker("Auxiliary verb", selection: $auxiliary) {
+                            ForEach(["haben", "sein"], id: \.self) { aux in
+                                Text(aux).tag(aux)
+                            }
                         }
-                            .textFieldStyle(.squareBorder)
+                        
+                    } else if wordType == .adjective {
+                        Toggle("Is regular", isOn: $isRegular).toggleStyle(.checkbox)
+                        if (!isRegular) {
+                            TextField(text: $comparative) {
+                                Text("Comparative form")
+                            }
+                                .textFieldStyle(.squareBorder)
 
-                    }
-                    
-                } else if grammaticalType == .preposition {
-                    Picker("Case", selection: $nounCase) {
-                        ForEach(["Nominative", "Accusative", "Dative", "Genitive"], id: \.self) { kase in
-                            Text(kase).tag(kase)
+                        }
+                        
+                    } else if wordType == .preposition {
+                        Picker("Case", selection: $nounCase) {
+                            ForEach(["Nominative", "Accusative", "Dative", "Genitive"], id: \.self) { kase in
+                                Text(kase).tag(kase)
+                            }
                         }
                     }
                 }
             }
             
             // generic misc fields
-            Section("Examples and Notes") {
+            Section("Other Info") {
+                VStack {
+                    Text("Vocabulary Categories")
+                    VocabTagChips(selection: $vocabTag)
+                }
                 VStack {
                     Text("Example Sentences")
                     TextEditor(text: $exampleSentence)
@@ -152,21 +158,21 @@ struct AddWordView: View {
             // 4. Action Buttons
             Section {
                 Button("Add Word") {
-                    if (grammaticalType == .noun) {
-                        store.addWord(Noun(german: german.capitalized, english: english, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm))
-                    } else if (grammaticalType == .verb) {
-                        store.addWord(Verb(german: german, english: english, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary))
-                    } else if (grammaticalType == .adjective) {
-                        store.addWord(Adjective(german: german, english: english, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative))
-                    } else if (grammaticalType == .preposition) {
-                        store.addWord(Preposition(german: german, english: english, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase))
+                    if (wordType == .noun) {
+                        store.addWord(Word(german: german.capitalized, english: english, type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm))
+                    } else if (wordType == .verb) {
+                        store.addWord(Word(german: german, english: english, type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary))
+                    } else if (wordType == .adjective) {
+                        store.addWord(Word(german: german, english: english, type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative))
+                    } else if (wordType == .preposition) {
+                        store.addWord(Word(german: german, english: english, type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase))
                     } else {
-                        store.addWord(Word(german: german, english: english, grammaticalType: grammaticalType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence))
+                        store.addWord(Word(german: german, english: english, type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence))
                     }
                     
                     german = ""
                     english = ""
-                    grammaticalType = .noun
+                    wordType = .noun
                     notes = ""
                     exampleSentence = ""
                     vocabTag = []
@@ -186,7 +192,6 @@ struct AddWordView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .padding()
         // This makes the top of the inspector look standard
         .navigationTitle("Add Word")
         //.navigationBarTitleDisplayMode(.inline) // says it's unavailable on macOS
