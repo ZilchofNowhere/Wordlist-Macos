@@ -7,29 +7,37 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct TagCategoryView: View {
-    @EnvironmentObject var store: WordStore
+    @Environment(\.modelContext) private var modelContext
     let category: GrammaticalType
-    @Binding var selectedWordId: UUID?
     
-    var wordset: [Word] {
-        switch category {
-            case .noun: return store.nouns
-            case .adjective: return store.adjectives
-            case .verb: return store.verbs
-            case .adverb: return store.adverbs
-            case .preposition: return store.prepositions
-            case .pronoun: return store.pronouns
-            case .conjunction: return store.conjunctions
-            case .interjection: return store.interjections
-        }
-    }
+    @Query private var words: [Word]
+    @Binding var selectedWordId: UUID?
 
+    init(category: GrammaticalType, filterString: String, selectedWordId: Binding<UUID?>) {
+        self.category = category
+        _selectedWordId = selectedWordId
+        
+        let predicate = #Predicate<Word> { word in
+            if filterString.isEmpty {
+                return true
+            } else {
+                return (
+                    word.german.localizedStandardContains(filterString) ||
+                    word.english.localizedStandardContains(filterString)
+                )
+            }
+        }
+        
+        _words = Query(filter: predicate, sort: \Word.german)
+    }
+    
     var body: some View {
-        if (wordset.count != 0) {
+        if (words.filter { $0.type == self.category}.count > 0) {
             List(selection: $selectedWordId) {
-                ForEach(wordset) { word in
+                ForEach(words.filter { $0.type == self.category }) { word in
                     WordCard(word: word, isSelected: selectedWordId == word.id).tag(word.id)
                 }
             }

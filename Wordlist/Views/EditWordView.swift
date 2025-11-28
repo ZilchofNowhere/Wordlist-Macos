@@ -6,11 +6,11 @@
 //
 
 import SwiftUI
-import Observation
+import SwiftData
 
 struct EditWordView: View {
-    @EnvironmentObject var store: WordStore
-    @ObservedObject var word: Word
+    @Environment(\.modelContext) private var modelContext
+    @Bindable var word: Word
     @State private var isEditing = false
     @State private var showDeleteConfirmation = false
     
@@ -29,7 +29,7 @@ struct EditWordView: View {
             .alert("Delete this word?", isPresented: $showDeleteConfirmation) {
                 // The destructive role here makes the button red inside the Alert popup
                 Button("Delete", role: .destructive) {
-                    store.delete(word)
+                    modelContext.delete(word)
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
@@ -86,7 +86,7 @@ struct EditWordView: View {
                                 if (word.gender != .plural) {
                                     TextField(text: Binding<String>(
                                         get: { word.pluralForm ?? "" },
-                                        set: { word.pluralForm = $0.isEmpty ? nil : $0 }
+                                        set: { word.pluralForm = $0.isEmpty ? nil : $0.capitalized }
                                     )) {
                                         Text("Plural form")
                                     }

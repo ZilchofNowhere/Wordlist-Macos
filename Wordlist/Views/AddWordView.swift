@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AddWordView: View {
-    @EnvironmentObject var store: WordStore
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) var dismiss
     
     @State private var german: String = ""
@@ -159,15 +160,15 @@ struct AddWordView: View {
             Section {
                 Button("Add Word") {
                     if (wordType == .noun) {
-                        store.addWord(Word(german: german.capitalized, english: english, type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm))
+                        modelContext.insert(Word(german: german.capitalized, english: english, type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm.capitalized))
                     } else if (wordType == .verb) {
-                        store.addWord(Word(german: german, english: english, type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary))
+                        modelContext.insert(Word(german: german, english: english, type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary))
                     } else if (wordType == .adjective) {
-                        store.addWord(Word(german: german, english: english, type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative))
+                        modelContext.insert(Word(german: german, english: english, type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative))
                     } else if (wordType == .preposition) {
-                        store.addWord(Word(german: german, english: english, type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase))
+                        modelContext.insert(Word(german: german, english: english, type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase))
                     } else {
-                        store.addWord(Word(german: german, english: english, type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence))
+                        modelContext.insert(Word(german: german, english: english, type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence))
                     }
                     
                     german = ""

@@ -6,9 +6,10 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct WordCard: View {
-    @EnvironmentObject var store: WordStore
+    @Environment(\.modelContext) private var modelContext
     var word: Word
     var isSelected: Bool
     
@@ -44,13 +45,13 @@ struct WordCard: View {
         }
         .contextMenu {
             Button {
-                store.addWord(word)
+                modelContext.insert(word)
             } label: {
                 Label("Duplicate", systemImage: "document.on.document")
             }
             
             Button(role: .destructive) {
-                store.delete(word)
+                modelContext.delete(word)
             } label: {
                 Label("Delete", systemImage: "trash")
             }
@@ -59,3 +60,6 @@ struct WordCard: View {
     }
 }
 
+#Preview {
+    WordCard(word: Word(german: "Kuh", english: "cow", type: .noun, vocabTag: [.animal], gender: .feminine, pluralForm: "Kühe"), isSelected: false)
+}

@@ -7,14 +7,34 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
-    @EnvironmentObject var store: WordStore
+    @Environment(\.modelContext) private var modelContext
     @Binding var selectedWordId: UUID?
+    
+    @Query private var words: [Word]
+    
+    init(filterString: String, selectedWordId: Binding<UUID?>) {
+        _selectedWordId = selectedWordId
+        
+        let predicate = #Predicate<Word> { word in
+            if filterString.isEmpty {
+                return true
+            } else {
+                return (
+                    word.german.localizedStandardContains(filterString) ||
+                    word.english.localizedStandardContains(filterString)
+                )
+            }
+        }
+        
+        _words = Query(filter: predicate, sort: \Word.german)
+    }
     
     var body: some View {
         List(selection: $selectedWordId) {
-            ForEach(store.all) { word in
+            ForEach(words) { word in
                 WordCard(word: word, isSelected: selectedWordId == word.id).tag(word.id)
             }
         }

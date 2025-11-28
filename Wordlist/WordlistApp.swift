@@ -10,7 +10,6 @@ import SwiftData
 
 @main
 struct WordlistApp: App {
-    @StateObject var store = WordStore()
     @Environment(\.openWindow) var openWindow
 
     var body: some Scene {

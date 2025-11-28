@@ -18,7 +18,7 @@ enum GrammaticalType: String, CaseIterable, Identifiable, Hashable, Codable {
     var id: Self { self }
 }
 
-enum Gender: String, CaseIterable, Identifiable, Hashable {
+enum Gender: String, CaseIterable, Identifiable, Hashable, Codable {
     case masculine = "Masculine"
     case feminine = "Feminine"
     case neuter = "Neuter"
@@ -28,7 +28,7 @@ enum Gender: String, CaseIterable, Identifiable, Hashable {
 }
 
 // will also have vocab categories like animals, school objects, etc. as tags
-enum VocabTag: String, CaseIterable, Identifiable, Hashable {
+enum VocabTag: String, CaseIterable, Identifiable, Hashable, Codable {
     case animal = "Animal"
     case food = "Food"
     case sport = "Sport"

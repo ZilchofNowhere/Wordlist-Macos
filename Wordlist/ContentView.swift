@@ -5,6 +5,9 @@
 //  Created by Arda Eren Kartal on 18.11.2025.
 //
 
+import SwiftUI
+import SwiftData
+
 enum SidebarItem: Hashable, Identifiable {
     case home
     case about
@@ -27,12 +30,9 @@ enum InspectorMode: Equatable {
     case editWord(Word)
 }
 
-import SwiftUI
-import SwiftData
-
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Word.german) private var words: [Word]
+    @Query private var words: [Word]
 
     @State private var selection: SidebarItem? = .home
     @State private var query = ""
@@ -47,9 +47,9 @@ struct ContentView: View {
         } detail: {
             switch selection {
                 case .home:
-                    HomeView(selectedWordId: $selectedWordId)
+                    HomeView(filterString: query, selectedWordId: $selectedWordId)
                 case .tag(let category):
-                    TagCategoryView(category: category, selectedWordId: $selectedWordId)
+                    TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
                 case .about:
                     AboutView()
                 case .quiz:
