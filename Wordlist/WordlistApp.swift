@@ -10,8 +10,6 @@ import SwiftData
 
 @main
 struct WordlistApp: App {
-    @Environment(\.openWindow) var openWindow
-
     var body: some Scene {
         Window("Wordlist", id: "main") {
             ContentView()
