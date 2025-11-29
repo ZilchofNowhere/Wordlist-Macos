@@ -10,14 +10,12 @@ import SwiftData
 
 enum SidebarItem: Hashable, Identifiable {
     case home
-    case about
     case tag(GrammaticalType)
     case quiz
 
     var id: String {
         switch self {
             case .home: return "home"
-            case .about: return "about"
             case .tag(let cat): return cat.rawValue
             case .quiz: return "quiz"
         }
@@ -50,8 +48,6 @@ struct ContentView: View {
                     HomeView(filterString: query, selectedWordId: $selectedWordId)
                 case .tag(let category):
                     TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
-                case .about:
-                    AboutView()
                 case .quiz:
                     QuizView()
                 case .none:
@@ -134,7 +130,6 @@ struct ContentView: View {
         switch item {
             case .home: return "house"
             case .tag: return "tag"
-            case .about: return "info.circle"
             case .quiz: return "graduationcap"
         }
     }

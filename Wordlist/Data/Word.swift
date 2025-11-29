@@ -50,9 +50,6 @@ final class Word: Identifiable {
         self.german = german
         self.english = english
         self.type = type
-        self.vocabTag = vocabTag
-        self.notes = notes
-        self.exampleSentence = exampleSentence
         self.gender = gender
         self.pluralForm = pluralForm
         self.isRegular = isRegular
@@ -63,6 +60,29 @@ final class Word: Identifiable {
         self.auxiliary = auxiliary
         self.comparativeForm = comparativeForm
         self.nounCase = nounCase
+        self.vocabTag = vocabTag
+        self.exampleSentence = exampleSentence
+        self.notes = notes
+    }
+    
+    func toCSV() -> String {
+        // schema: german,english,type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,vocabTag,exampleSentence,notes
+        var tags = ""
+        for tag in vocabTag {
+            tags.append("\(tag.rawValue),")
+        }
+        return switch type {
+            case .noun:
+                "\(german),\(english),\(type),\(gender?.rawValue ?? ""),\(pluralForm ?? ""),,,,,,,,,\(tags),\(exampleSentence ?? ""),\(notes ?? "")"
+            case .verb:
+                "\(german),\(english),\(type),,,\(isRegular),\(isSeparable),\(present ?? ""),\(imperfect ?? ""),\(pastParticiple ?? ""),\(auxiliary),,,\(tags),\(exampleSentence ?? ""),\(notes ?? "")"
+            case .adjective:
+                "\(german),\(english),\(type),,,\(isRegular),,,,,,\(comparativeForm ?? ""),,\(tags),\(exampleSentence ?? ""),\(notes ?? "")"
+            case .preposition:
+                "\(german),\(english),\(type),,,,,,,,,,\(nounCase ?? ""),\(tags),\(exampleSentence ?? ""),\(notes ?? "")"
+            default:
+                "\(german),\(english),\(type),,,,,,,,,,,\(tags),\(exampleSentence ?? ""),\(notes ?? "")"
+        }
     }
 }
 
@@ -103,3 +123,10 @@ func searchWord(_ word: Word, for query: String) -> Bool {
     return wordSpecificCheck || tagCheck || word.german.localizedStandardContains(query) || word.english.localizedStandardContains(query)
 }
 
+func exportToCSV() {
+    
+}
+
+func readCSV(data: String) {
+    
+}

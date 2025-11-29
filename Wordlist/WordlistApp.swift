@@ -13,19 +13,24 @@ struct WordlistApp: App {
     @Environment(\.openWindow) var openWindow
 
     var body: some Scene {
-        WindowGroup {
+        Window("Wordlist", id: "main") {
             ContentView()
         }
         .modelContainer(for: Word.self)
         .commands {
-            CommandGroup(replacing: .appInfo) {
-                Button("About Wordlist") {
-                    openWindow(id: "about-app")
+            CommandGroup(replacing: .importExport) {
+                Button {
+                    
+                } label: {
+                    Label("Import...", systemImage: "square.and.arrow.down")
+                }
+                Button {
+                    
+                } label: {
+                    Label("Export...", systemImage: "square.and.arrow.up")
                 }
             }
-        }
-        Window("About Wordlist", id: "about-app") {
-            AboutView()
+            SidebarCommands()
         }
         .windowResizability(.contentSize)
         .defaultPosition(.center)
