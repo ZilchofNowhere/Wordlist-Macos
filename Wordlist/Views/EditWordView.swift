@@ -218,7 +218,7 @@ struct EditWordView: View {
                                 LabeledContent("Imperfect form") { Text(word.imperfect ?? "") }
                                 LabeledContent("Past participle") { Text(word.pastParticiple ?? "") }
                             }
-                            LabeledContent("Auxiliary Verb") { Text(word.auxiliary) }
+                            LabeledContent("Auxiliary Verb") { Text(word.auxiliary ?? "haben") }
                         }
                         
                         else if word.type == .adjective {

@@ -202,41 +202,33 @@ struct ContentView: View {
         do {
             let dataFrame = try DataFrame(contentsOfCSVFile: url, options: loadOptions)
             
-            
             for row in dataFrame.rows {
-                guard let german = row["german"] as? String,
-                      let english = row["english"] as? String,
-                      let typeStr = row["type"] as? String,
-                      let genderStr = row["gender"] as? String,
-                      let pluralForm = row["pluralForm"] as? String,
-                      let isRegularStr = row["isRegular"] as? String,
-                      let isSeparableStr = row["isSeparable"] as? String,
-                      let present = row["present"] as? String,
-                      let imperfect = row["imperfect"] as? String,
-                      let pastParticiple = row["pastParticiple"] as? String,
-                      let auxiliary = row["auxiliary"] as? String,
-                      let comparativeForm = row["comparativeForm"] as? String,
-                      let nounCase = row["nounCase"] as? String,
-                      let exampleSentence = row["exampleSentence"] as? String,
-                      let notes = row["notes"] as? String,
-                      let tempTags = row["vocabTag"] as? [String]
-                else {
-                    print("An error occurred while parsing")
-                    continue
-                }
-                
-                print("Think we guarded fine")
-                
-                let gender = Gender(rawValue: genderStr)
+                print(row)
+                let german = row["german"] as? String
+                let english = row["english"] as? String
+                let typeStr = row["type"] as? String
+                let genderStr = row["gender"] as? String
+                let pluralForm = row["pluralForm"] as? String
+                let isRegularStr = row["isRegular"] as? String
+                let isSeparableStr = row["isSeparable"] as? String
+                let present = row["present"] as? String
+                let imperfect = row["imperfect"] as? String
+                let pastParticiple = row["pastParticiple"] as? String
+                let auxiliary = row["auxiliary"] as? String
+                let comparativeForm = row["comparativeForm"] as? String
+                let nounCase = row["nounCase"] as? String
+                let exampleSentence = row["exampleSentence"] as? String
+                let notes = row["notes"] as? String
+                let tempTags = row["vocabTag"] as? String
+                                
+                let gender = genderStr == nil || genderStr!.isEmpty ? nil : Gender(rawValue: genderStr!)
                 let isRegular = isRegularStr == "true"
                 let isSeparable = isSeparableStr == "true"
-                var vocabTag: [VocabTag] = []
-                for tag in tempTags {
-                    vocabTag.append(.init(rawValue: tag)!)
-                }
-                let type = GrammaticalType(rawValue: typeStr)!
+                let vocabTag: [VocabTag] = tempTags == nil || tempTags!.isEmpty ? [] : tempTags!.split(separator: ",", omittingEmptySubsequences: false).map { VocabTag.init(rawValue: String($0))! }
                 
-                let newWord = Word(german: german, english: english, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase)
+                let type = GrammaticalType(rawValue: typeStr!)!
+                
+                let newWord = Word(german: german!, english: english!, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase)
                 
                 modelContext.insert(newWord)
             }
