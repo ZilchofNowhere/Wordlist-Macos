@@ -1,2 +1,2 @@
-add a toCSV function to Word class that will be overridden by child classes
+functionality to add new tags
 add image capability when everything basic is completed

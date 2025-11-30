@@ -235,18 +235,22 @@ struct EditWordView: View {
                 }
                 
                 Section {
-                    VStack {
-                        Text("Vocabulary Categories")
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            ForEach(word.vocabTag, id: \.self) { tag in
-                                Button {
-                                    
-                                } label: {
-                                    Text(tag.rawValue)
+                    if word.vocabTag != [] {
+                        VStack {
+                            Text("Vocabulary Categories")
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 10) {
+                                    ForEach(word.vocabTag, id: \.self) { tag in
+                                        Button {
+                                            
+                                        } label: {
+                                            Text(tag.rawValue)
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .buttonBorderShape(.capsule)
+                                        .controlSize(.small)
+                                    }
                                 }
-                                .buttonStyle(.bordered)
-                                .buttonBorderShape(.capsule)
-                                .controlSize(.small)
                             }
                         }
                     }
@@ -255,7 +259,7 @@ struct EditWordView: View {
                         ScrollView {
                             Text(word.exampleSentence ?? "")
                                 .font(.body)
-                                .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading) // Align text to top-left
+                                .frame(maxWidth: .infinity, alignment: .leading) // Align text to top-left
                                 .textSelection(.enabled) // ✅ Allows copying text
                         }
                         .padding(8) // Match TextEditor default padding
@@ -277,7 +281,7 @@ struct EditWordView: View {
                         .cornerRadius(8)
 
                     }
-                } header: { Text("Examples and Notes") }
+                } header: { Text("Other Info") }
             }
         })
         .navigationTitle("Editing \"\(word.german)\"")

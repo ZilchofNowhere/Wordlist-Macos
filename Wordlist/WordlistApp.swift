@@ -18,12 +18,12 @@ struct WordlistApp: App {
         .commands {
             CommandGroup(replacing: .importExport) {
                 Button {
-                    
+                    NotificationCenter.default.post(name: .importCSV, object: nil)
                 } label: {
                     Label("Import...", systemImage: "square.and.arrow.down")
                 }
                 Button {
-                    
+                    NotificationCenter.default.post(name: .exportCSV, object: nil)
                 } label: {
                     Label("Export...", systemImage: "square.and.arrow.up")
                 }

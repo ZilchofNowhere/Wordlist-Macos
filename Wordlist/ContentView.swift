@@ -7,6 +7,9 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
+import TabularData
+
 
 enum SidebarItem: Hashable, Identifiable {
     case home
@@ -70,6 +73,16 @@ struct ContentView: View {
                 }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
+            DispatchQueue.main.async {
+                exportToCSV()
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .importCSV)) { _ in
+            DispatchQueue.main.async {
+                importFromCSV()
+            }
+        }
         .onChange(of: selectedWordId) { oldValue, newValue in
             guard let newId = newValue else {
                 if case .editWord = inspectorMode {
@@ -126,16 +139,115 @@ struct ContentView: View {
     }
         
     
-    func icon(for item: SidebarItem) -> String {
+    private func icon(for item: SidebarItem) -> String {
         switch item {
             case .home: return "house"
             case .tag: return "tag"
             case .quiz: return "graduationcap"
         }
     }
+    
+    private func exportToCSV() {
+        do {
+            let descriptor = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
+            let allWords = try modelContext.fetch(descriptor)
+            
+            var resultStr = "german,english,type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,exampleSentence,notes,vocabTag\n"
+            
+            for word in allWords {
+                resultStr.append(word.toCSV() + "\n")
+            }
+            
+            saveExportToFile(resultStr)
+        } catch {
+            print("Failed to export to CSV: \(error)")
+        }
+    }
+    
+    private func saveExportToFile(_ str: String) {
+        let savePanel = NSSavePanel()
+        savePanel.allowedContentTypes = [.commaSeparatedText]
+        savePanel.nameFieldStringValue = "words.csv"
+        savePanel.canCreateDirectories = true
+        savePanel.isExtensionHidden = false
+        savePanel.title = "Export to CSV"
+        savePanel.message = "Choose a location to save your CSV file."
+        
+        let response = savePanel.runModal()
+        if response == .OK {
+            guard let destinationURL = savePanel.url else { return }
+            try? str.write(to: destinationURL, atomically: true, encoding: .utf8)
+        }
+    }
+    
+    private func importFromCSV() {
+        let openPanel = NSOpenPanel()
+        openPanel.allowedContentTypes = [.commaSeparatedText]
+        openPanel.isExtensionHidden = false
+        openPanel.title = "Import from CSV"
+        openPanel.message = "Choose a CSV file to import."
+        
+        let response = openPanel.runModal()
+        if response == .OK {
+            guard let sourceURL = openPanel.url else { return }
+            print("Importing from: \(sourceURL.path)")
+            
+            CSVtoWord(from: sourceURL)
+        }
+    }
+    
+    // FIXME: we can't get past guard let
+    private func CSVtoWord(from url: URL) {
+        let loadOptions = CSVReadingOptions(hasHeaderRow: true, delimiter: ",")
+        do {
+            let dataFrame = try DataFrame(contentsOfCSVFile: url, options: loadOptions)
+            
+            
+            for row in dataFrame.rows {
+                guard let german = row["german"] as? String,
+                      let english = row["english"] as? String,
+                      let typeStr = row["type"] as? String,
+                      let genderStr = row["gender"] as? String,
+                      let pluralForm = row["pluralForm"] as? String,
+                      let isRegularStr = row["isRegular"] as? String,
+                      let isSeparableStr = row["isSeparable"] as? String,
+                      let present = row["present"] as? String,
+                      let imperfect = row["imperfect"] as? String,
+                      let pastParticiple = row["pastParticiple"] as? String,
+                      let auxiliary = row["auxiliary"] as? String,
+                      let comparativeForm = row["comparativeForm"] as? String,
+                      let nounCase = row["nounCase"] as? String,
+                      let exampleSentence = row["exampleSentence"] as? String,
+                      let notes = row["notes"] as? String,
+                      let tempTags = row["vocabTag"] as? [String]
+                else {
+                    print("An error occurred while parsing")
+                    continue
+                }
+                
+                print("Think we guarded fine")
+                
+                let gender = Gender(rawValue: genderStr)
+                let isRegular = isRegularStr == "true"
+                let isSeparable = isSeparableStr == "true"
+                var vocabTag: [VocabTag] = []
+                for tag in tempTags {
+                    vocabTag.append(.init(rawValue: tag)!)
+                }
+                let type = GrammaticalType(rawValue: typeStr)!
+                
+                let newWord = Word(german: german, english: english, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase)
+                
+                modelContext.insert(newWord)
+            }
+        }
+        catch {
+            print(error)
+        }
+    }
 }
 
-#Preview {
-    ContentView()
-        .tint(.orange)
+extension Notification.Name {
+    static let exportCSV = Notification.Name("exportCSV")
+    static let importCSV = Notification.Name("importCSV")
 }

@@ -20,13 +20,7 @@ struct WordCard: View {
             
             VStack {
                 if word.type == .noun {
-                    Text(verbatim: { () -> String in
-                        var base = "\(word.article) \(word.german)"
-                        if let plural = word.pluralForm, !plural.isEmpty {
-                            base += ", \(plural)"
-                        }
-                        return base
-                    }())
+                    Text("\(Text(word.article).foregroundStyle(isSelected ? AnyShapeStyle(.foreground) : (word.gender == .masculine ? AnyShapeStyle(.blue) : (word.gender == .feminine ? AnyShapeStyle(.pink) : (word.gender == .neuter ? AnyShapeStyle(.green) : AnyShapeStyle(.yellow)))))) \(word.german), \(word.pluralForm == nil || word.pluralForm!.isEmpty ? "-" : word.pluralForm!)")
                     .font(.title2)
                     .foregroundStyle(.foreground)
                 } else {
@@ -39,6 +33,17 @@ struct WordCard: View {
                     .font(.title3)
                     .foregroundStyle(.secondary)
                 
+                HStack(spacing: 8) {
+                    ForEach(word.vocabTag) { tag in
+                        Text(tag.rawValue.capitalized)
+                            .font(.caption)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .foregroundColor(.secondary)
+                            .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.secondary))
+                    }
+                }
+                .offset(y: 10)
             }
             .padding(20)
             .multilineTextAlignment(.center)

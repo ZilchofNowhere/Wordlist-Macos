@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 func searchWord(_ word: Word, for query: String) -> Bool {
     let wordSpecificCheck = switch word.type {
@@ -36,12 +37,4 @@ func searchWord(_ word: Word, for query: String) -> Bool {
     }
     
     return wordSpecificCheck || tagCheck || word.german.localizedStandardContains(query) || word.english.localizedStandardContains(query)
-}
-
-func importFromCSV() {
-    
-}
-
-func exportToCSV() {
-    
 }
