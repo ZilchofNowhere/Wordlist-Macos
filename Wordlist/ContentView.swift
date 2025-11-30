@@ -196,7 +196,6 @@ struct ContentView: View {
         }
     }
     
-    // FIXME: we can't get past guard let
     private func CSVtoWord(from url: URL) {
         let loadOptions = CSVReadingOptions(hasHeaderRow: true, delimiter: ",")
         do {
@@ -220,7 +219,7 @@ struct ContentView: View {
                 let exampleSentence = row["exampleSentence"] as? String
                 let notes = row["notes"] as? String
                 let tempTags = row["vocabTag"] as? String
-                                
+
                 let gender = genderStr == nil || genderStr!.isEmpty ? nil : Gender(rawValue: genderStr!)
                 let isRegular = isRegularStr == "true"
                 let isSeparable = isSeparableStr == "true"

@@ -43,7 +43,7 @@ struct WordCard: View {
                             .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.secondary))
                     }
                 }
-                .offset(y: 10)
+//                .offset(y: 10)
             }
             .padding(20)
             .multilineTextAlignment(.center)
@@ -61,7 +61,7 @@ struct WordCard: View {
                 Label("Delete", systemImage: "trash")
             }
         }
-        .frame(height: 150)
+        .frame(height: 120)
     }
 }
 

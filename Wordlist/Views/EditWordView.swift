@@ -264,7 +264,7 @@ struct EditWordView: View {
                         }
                         .padding(8) // Match TextEditor default padding
                         .background(Color(nsColor: .textBackgroundColor))
-                        .frame(height: 80)
+                        .frame(minHeight: 80)
                         .cornerRadius(8)
                     }
                     VStack {
@@ -277,7 +277,7 @@ struct EditWordView: View {
                         }
                         .padding(8) // Match TextEditor default padding
                         .background(Color(nsColor: .textBackgroundColor))
-                        .frame(height: 130)
+                        .frame(minHeight: 130)
                         .cornerRadius(8)
 
                     }

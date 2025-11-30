@@ -18,6 +18,9 @@ struct SidebarView: View {
                 NavigationLink(value: SidebarItem.home) {
                     Label("Home", systemImage: "house")
                 }
+                NavigationLink(value: SidebarItem.quiz) {
+                    Label("Quiz", systemImage: "graduationcap")
+                }
             }
 
             // TAGS SECTION
@@ -34,12 +37,6 @@ struct SidebarView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.secondary)
                         .padding(5)
-                }
-            }
-            
-            Section {
-                NavigationLink(value: SidebarItem.quiz) {
-                    Label("Quiz", systemImage: "graduationcap")
                 }
             }
         }
