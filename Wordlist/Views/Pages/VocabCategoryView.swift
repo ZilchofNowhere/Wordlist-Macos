@@ -1,22 +1,21 @@
 //
-//  TagsView.swift
+//  VocabCategoryView.swift
 //  Wordlist
 //
-//  Created by Arda Eren Kartal on 18.11.2025.
+//  Created by Arda Eren Kartal on 1.12.2025.
 //
-
 
 import SwiftUI
 import SwiftData
 
-struct TagCategoryView: View {
+struct VocabCategoryView: View {
     @Environment(\.modelContext) private var modelContext
-    let category: GrammaticalType
+    let category: VocabTag
     
     @Query private var words: [Word]
     @Binding var selectedWordId: UUID?
-
-    init(category: GrammaticalType, filterString: String, selectedWordId: Binding<UUID?>) {
+    
+    init(category: VocabTag, filterString: String, selectedWordId: Binding<UUID?>) {
         self.category = category
         _selectedWordId = selectedWordId
         
@@ -35,9 +34,9 @@ struct TagCategoryView: View {
     }
     
     var body: some View {
-        if (words.filter { $0.type == self.category}.count > 0) {
+        if (words.filter { $0.vocabTag.contains(self.category) }.count > 0) {
             List(selection: $selectedWordId) {
-                ForEach(words.filter { $0.type == self.category }) { word in
+                ForEach(words.filter { $0.vocabTag.contains(self.category) }) { word in
                     WordCard(word: word, isSelected: selectedWordId == word.id).tag(word.id)
                 }
             }

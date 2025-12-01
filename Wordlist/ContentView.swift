@@ -13,13 +13,15 @@ import TabularData
 
 enum SidebarItem: Hashable, Identifiable {
     case home
-    case tag(GrammaticalType)
+    case type(GrammaticalType)
+    case category(VocabTag)
     case quiz
 
     var id: String {
         switch self {
             case .home: return "home"
-            case .tag(let cat): return cat.rawValue
+            case .type(let cat): return cat.rawValue
+            case .category(let cat): return cat.rawValue
             case .quiz: return "quiz"
         }
     }
@@ -49,8 +51,10 @@ struct ContentView: View {
             switch selection {
                 case .home:
                     HomeView(filterString: query, selectedWordId: $selectedWordId)
-                case .tag(let category):
+                case .type(let category):
                     TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
+                case .category(let category):
+                    VocabCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
                 case .quiz:
                     QuizView()
                 case .none:
@@ -136,15 +140,6 @@ struct ContentView: View {
             }
         }
         
-    }
-        
-    
-    private func icon(for item: SidebarItem) -> String {
-        switch item {
-            case .home: return "house"
-            case .tag: return "tag"
-            case .quiz: return "graduationcap"
-        }
     }
     
     private func exportToCSV() {

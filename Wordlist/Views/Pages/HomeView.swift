@@ -29,7 +29,9 @@ struct HomeView: View {
             }
         }
         
-        _words = Query(filter: predicate, sort: \Word.german)
+        _words = Query(filter: predicate, sort: [
+            SortDescriptor(\Word.german, comparator: .localizedStandard)
+        ])
     }
     
     var body: some View {

@@ -27,7 +27,6 @@ enum Gender: String, CaseIterable, Identifiable, Hashable, Codable {
     var id: Self { self }
 }
 
-// will also have vocab categories like animals, school objects, etc. as tags
 enum VocabTag: String, CaseIterable, Identifiable, Hashable, Codable {
     case animal = "Animal"
     case food = "Food"
@@ -39,6 +38,11 @@ enum VocabTag: String, CaseIterable, Identifiable, Hashable, Codable {
     case health = "Health"
     case city = "City"
     case family = "Family"
+    case job = "Job"
+    case science = "Science"
+    case emotion = "Emotion and Personality"
+    case travel = "Travel"
+    case art = "Art"
     
     var id: Self { self }
 }
