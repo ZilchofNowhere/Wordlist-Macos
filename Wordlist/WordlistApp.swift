@@ -13,6 +13,7 @@ struct WordlistApp: App {
     var body: some Scene {
         Window("Wordlist", id: "main") {
             ContentView()
+                .frame(minWidth: 540)
         }
         .modelContainer(for: Word.self)
         .commands {
@@ -30,7 +31,7 @@ struct WordlistApp: App {
             }
             SidebarCommands()
         }
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         .defaultPosition(.center)
     }
 }

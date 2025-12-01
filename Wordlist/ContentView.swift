@@ -42,104 +42,120 @@ struct ContentView: View {
     @State private var selectedSegment = 0
     @State private var selectedWordId: UUID?
     @State private var inspectorMode: InspectorMode = .none
+    @State private var sidebarVisibility: NavigationSplitViewVisibility = .all
+    @State private var wasSidebarOpen: Bool = false
 
     var body: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-                .frame(minWidth: 180)
-        } detail: {
-            switch selection {
-                case .home:
-                    HomeView(filterString: query, selectedWordId: $selectedWordId)
-                case .type(let category):
-                    TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
-                case .category(let category):
-                    VocabCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
-                case .quiz:
-                    QuizView()
-                case .none:
-                    Text("Select a page")
-            }
-        }
-        .searchable(text: $query, prompt: "Search words...")
-        .inspector(isPresented: Binding(
-            get: { inspectorMode != .none },
-            set: { if !$0 { inspectorMode = .none }}
-        )) {
-            Group {
-                switch inspectorMode {
+        GeometryReader { geometry in
+            NavigationSplitView(columnVisibility: $sidebarVisibility) {
+                SidebarView(selection: $selection)
+                    .frame(minWidth: 180)
+            } detail: {
+                switch selection {
+                    case .home:
+                        HomeView(filterString: query, selectedWordId: $selectedWordId)
+                    case .type(let category):
+                        TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
+                    case .category(let category):
+                        VocabCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
+                    case .quiz:
+                        QuizView()
                     case .none:
-                        EmptyView()
-                    case .addWord:
-                        AddWordView()
-                    case .editWord(let word):
-                        EditWordView(word: word)
+                        Text("Select a page")
                 }
             }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
-            DispatchQueue.main.async {
-                exportToCSV()
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .importCSV)) { _ in
-            DispatchQueue.main.async {
-                importFromCSV()
-            }
-        }
-        .onChange(of: selectedWordId) { oldValue, newValue in
-            guard let newId = newValue else {
-                if case .editWord = inspectorMode {
-                    inspectorMode = .none
+            .searchable(text: $query, prompt: "Search words...")
+            .inspector(isPresented: Binding(
+                get: { inspectorMode != .none },
+                set: { if !$0 { inspectorMode = .none }}
+            )) {
+                Group {
+                    switch inspectorMode {
+                        case .none:
+                            EmptyView()
+                        case .addWord:
+                            AddWordView()
+                        case .editWord(let word):
+                            EditWordView(word: word)
+                    }
                 }
-                return
             }
-            
-            if let editedWord = words.first(where: { $0.id == newId }) {
-                inspectorMode = .editWord(editedWord)
+            .onReceive(NotificationCenter.default.publisher(for: .exportCSV)) { _ in
+                DispatchQueue.main.async {
+                    exportToCSV()
+                }
             }
-        }
-        .toolbar {
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    if (inspectorMode != .addWord) {
-                        inspectorMode = .addWord
-                    } else {
+            .onReceive(NotificationCenter.default.publisher(for: .importCSV)) { _ in
+                DispatchQueue.main.async {
+                    importFromCSV()
+                }
+            }
+            .onChange(of: geometry.size.width, initial: true) { _, newSize in
+                if newSize < 731 {
+                    if sidebarVisibility == .all {
+                        wasSidebarOpen = true
+                    }
+                    sidebarVisibility = .detailOnly
+                } else {
+                    if wasSidebarOpen {
+                        sidebarVisibility = .all
+                        wasSidebarOpen = false
+                    }
+                }
+            }
+            .onChange(of: selectedWordId) { oldValue, newValue in
+                guard let newId = newValue else {
+                    if case .editWord = inspectorMode {
                         inspectorMode = .none
                     }
-                } label: {
-                    Image(systemName: "plus")
+                    return
                 }
-                .help("Add a new word")
+                
+                if let editedWord = words.first(where: { $0.id == newId }) {
+                    inspectorMode = .editWord(editedWord)
+                }
             }
-            ToolbarItem(placement: .automatic) {
-                Button {
-                    if selectedWordId == nil {
-                        if inspectorMode == .none {
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        if (inspectorMode != .addWord) {
                             inspectorMode = .addWord
                         } else {
                             inspectorMode = .none
                         }
-                    } else {
-                        if inspectorMode != .none && inspectorMode != .addWord {
-                            inspectorMode = .none
-                        } else {
-                            let editedWord = words.first(where: { $0.id == $selectedWordId.wrappedValue! })
-                            if editedWord == nil {
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .help("Add a new word")
+                }
+                ToolbarItem(placement: .automatic) {
+                    Button {
+                        if selectedWordId == nil {
+                            if inspectorMode == .none {
                                 inspectorMode = .addWord
-                                selectedWordId = nil
                             } else {
-                                inspectorMode = .editWord(editedWord!)
+                                inspectorMode = .none
+                            }
+                        } else {
+                            if inspectorMode != .none && inspectorMode != .addWord {
+                                inspectorMode = .none
+                            } else {
+                                let editedWord = words.first(where: { $0.id == $selectedWordId.wrappedValue! })
+                                if editedWord == nil {
+                                    inspectorMode = .addWord
+                                    selectedWordId = nil
+                                } else {
+                                    inspectorMode = .editWord(editedWord!)
+                                }
                             }
                         }
+                    } label: {
+                        Image(systemName: "sidebar.right")
                     }
-                } label: {
-                    Image(systemName: "sidebar.right")
+                    .help("Toggle the sidebar")
                 }
-                .help("Toggle the sidebar")
             }
         }
-        
     }
     
     private func exportToCSV() {
