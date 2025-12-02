@@ -23,11 +23,14 @@ struct WordlistApp: App {
                 } label: {
                     Label("Import...", systemImage: "square.and.arrow.down")
                 }
+                .keyboardShortcut("I", modifiers: .command)
+                
                 Button {
                     NotificationCenter.default.post(name: .exportCSV, object: nil)
                 } label: {
                     Label("Export...", systemImage: "square.and.arrow.up")
                 }
+                .keyboardShortcut("E", modifiers: .command)
             }
             SidebarCommands()
         }

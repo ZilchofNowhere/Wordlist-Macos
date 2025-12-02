@@ -220,6 +220,16 @@ struct EditWordView: View {
                                     .aspectRatio(contentMode: .fit)
                                     .frame(height: 100)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    .contextMenu {
+                                        Button {
+                                            let pasteboard = NSPasteboard.general
+                                            pasteboard.clearContents()
+                                            pasteboard.writeObjects([image])
+                                        } label: {
+                                            Label("Copy", systemImage: "document.on.document")
+                                        }
+                                    }
+                                    .draggable(image)
                             }
                             Spacer()
                         }
