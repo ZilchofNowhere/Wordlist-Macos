@@ -17,7 +17,7 @@ struct SidebarView: View {
             // Main section
             Section {
                 NavigationLink(value: SidebarItem.home) {
-                    Label("Home", systemImage: "house")
+                    Label("All Words", systemImage: "square.grid.2x2")
                 }
                 NavigationLink(value: SidebarItem.quiz) {
                     Label("Quiz", systemImage: "graduationcap")

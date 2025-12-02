@@ -17,6 +17,7 @@ final class Word: Identifiable {
     var vocabTag: [VocabTag]
     var notes: String?
     var exampleSentence: String?
+    @Attribute(.externalStorage) var imageData: Data?
     
     // noun
     var gender: Gender?
@@ -45,7 +46,7 @@ final class Word: Identifiable {
     // prep
     var nounCase: String?
     
-    init(german: String, english: String, type: GrammaticalType, vocabTag: [VocabTag] = [], notes: String? = nil, exampleSentence: String? = nil, gender: Gender? = nil, pluralForm: String? = nil, isRegular: Bool = true, isSeparable: Bool = false, present: String? = nil, imperfect: String? = nil, pastParticiple: String? = nil, auxiliary: String? = "haben", comparativeForm: String? = nil, nounCase: String? = nil) {
+    init(german: String, english: String, type: GrammaticalType, vocabTag: [VocabTag] = [], notes: String? = nil, exampleSentence: String? = nil, gender: Gender? = nil, pluralForm: String? = nil, isRegular: Bool = true, isSeparable: Bool = false, present: String? = nil, imperfect: String? = nil, pastParticiple: String? = nil, auxiliary: String? = "haben", comparativeForm: String? = nil, nounCase: String? = nil, imageData: Data? = nil) {
         self.german = german
         self.english = english
         self.type = type
@@ -62,6 +63,7 @@ final class Word: Identifiable {
         self.vocabTag = vocabTag
         self.exampleSentence = exampleSentence
         self.notes = notes
+        self.imageData = imageData
     }
         
     func toCSV() -> String {

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct AddWordView: View {
     @Environment(\.modelContext) private var modelContext
@@ -18,6 +19,9 @@ struct AddWordView: View {
     @State private var notes: String = ""
     @State private var exampleSentence: String = ""
     @State private var vocabTag: [VocabTag] = []
+    @State private var image: NSImage? = nil
+    @State private var imageData: Data? = nil
+    @State private var isImageDialogShown: Bool = false
     
     // noun fields
     @State private var gender: Gender = .masculine
@@ -70,7 +74,6 @@ struct AddWordView: View {
                     Text("English translation")
                 }
                     .textFieldStyle(.squareBorder)
-
             }
             
             // 3. Dynamic Fields based on selection
@@ -155,20 +158,50 @@ struct AddWordView: View {
                         .frame(height: 130)
                         .cornerRadius(8)
                 }
+                
+                VStack {
+                    Text("Image")
+                    if let nsImage = image {
+                        Image(nsImage: nsImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 100)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    HStack {
+                        Button {
+                            isImageDialogShown = true
+                        } label: {
+                            Label("Pick image...", systemImage: "photo")
+                        }
+                        
+                        Button(role: .destructive) {
+                            image = nil
+                            imageData = nil
+                        } label: {
+                            Label("Remove", systemImage: "trash")
+                        }
+                        .disabled(image == nil)
+                    }
+                }
             }
+            .fileImporter(isPresented: $isImageDialogShown, allowedContentTypes: [.image]) { result in
+                uploadImage(result)
+            }
+            
             // 4. Action Buttons
             Section {
                 Button("Add Word") {
                     if (wordType == .noun) {
-                        modelContext.insert(Word(german: german.capitalized, english: english, type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm.capitalized))
+                        modelContext.insert(Word(german: german.capitalized, english: english, type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm.capitalized, imageData: imageData))
                     } else if (wordType == .verb) {
-                        modelContext.insert(Word(german: german, english: english, type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary))
+                        modelContext.insert(Word(german: german, english: english, type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, imageData: imageData))
                     } else if (wordType == .adjective) {
-                        modelContext.insert(Word(german: german, english: english, type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative))
+                        modelContext.insert(Word(german: german, english: english, type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative, imageData: imageData))
                     } else if (wordType == .preposition) {
-                        modelContext.insert(Word(german: german, english: english, type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase))
+                        modelContext.insert(Word(german: german, english: english, type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase, imageData: imageData))
                     } else {
-                        modelContext.insert(Word(german: german, english: english, type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence))
+                        modelContext.insert(Word(german: german, english: english, type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, imageData: imageData))
                     }
                     
                     german = ""
@@ -187,6 +220,8 @@ struct AddWordView: View {
                     auxiliary = "haben"
                     comparative = ""
                     nounCase = "Accusative"
+                    image = nil
+                    imageData = nil
                }
                 .disabled(german.isEmpty || english.isEmpty) // Prevent empty words
                 .buttonStyle(.borderedProminent)
@@ -196,6 +231,25 @@ struct AddWordView: View {
         // This makes the top of the inspector look standard
         .navigationTitle("Add Word")
         //.navigationBarTitleDisplayMode(.inline) // says it's unavailable on macOS
+    }
+    
+    private func uploadImage(_ result: Result<URL, Error>) {
+        switch result {
+            case .success(let url):
+                if url.startAccessingSecurityScopedResource() {
+                    do {
+                        let data = try Data(contentsOf: url)
+                        self.imageData = data
+                        self.image = NSImage(data: data)
+                    } catch {
+                        print(error)
+                    }
+                    url.stopAccessingSecurityScopedResource()
+                }
+                
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+        }
     }
 }
 

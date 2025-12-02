@@ -7,12 +7,14 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct EditWordView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var word: Word
     @State private var isEditing = false
     @State private var showDeleteConfirmation = false
+    @State private var showImagePicker: Bool = false
     
     var body: some View {
         HStack {
@@ -176,11 +178,48 @@ struct EditWordView: View {
                         .frame(height: 130)
                         .cornerRadius(8)
                     }
+                    VStack {
+                        Text("Image")
+                        if word.imageData != nil, let nsImage = NSImage(data: word.imageData!) {
+                            Image(nsImage: nsImage)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                        HStack {
+                            Button {
+                                showImagePicker = true
+                            } label: {
+                                Label("Pick image...", systemImage: "photo")
+                            }
+                            
+                            Button(role: .destructive) {
+                                word.imageData = nil
+                            } label: {
+                                Label("Remove", systemImage: "trash")
+                            }
+                            .disabled(word.imageData == nil)
+                        }
+                    }
                 } header: { Text("Other Info") }
+                    .fileImporter(isPresented: $showImagePicker, allowedContentTypes: [.image]) { result in
+                        uploadImage(result)
+                    }
             }
             // view only mode
             else {
                 Section {
+                    if word.imageData != nil, let image = NSImage(data: word.imageData!) {
+                        VStack(alignment: .center) {
+                            Text("Image")
+                            Image(nsImage: image)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
                     LabeledContent("Word Type") { Text(word.type.rawValue) }
                     LabeledContent("German word") {
                         Text(word.german)
@@ -241,9 +280,7 @@ struct EditWordView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
                                     ForEach(word.vocabTag, id: \.self) { tag in
-                                        Button {
-                                            
-                                        } label: {
+                                        Button {} label: {
                                             Text(tag.rawValue)
                                         }
                                         .buttonStyle(.bordered)
@@ -285,5 +322,23 @@ struct EditWordView: View {
             }
         })
         .navigationTitle("Editing \"\(word.german)\"")
+    }
+    
+    private func uploadImage(_ result: Result<URL, Error>) {
+        switch result {
+            case .success(let url):
+                if url.startAccessingSecurityScopedResource() {
+                    do {
+                        let data = try Data(contentsOf: url)
+                        word.imageData = data
+                    } catch {
+                        print(error)
+                    }
+                    url.stopAccessingSecurityScopedResource()
+                }
+                
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+        }
     }
 }

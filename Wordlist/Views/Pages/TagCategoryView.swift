@@ -41,11 +41,11 @@ struct TagCategoryView: View {
                     WordCard(word: word, isSelected: selectedWordId == word.id).tag(word.id)
                 }
             }
-            .navigationTitle(self.category.rawValue)
+            .navigationTitle(self.category.rawValue + "s")
         } else {
             Text("No words in this category. 🫠")
                 .font(.largeTitle)
-                .navigationTitle(self.category.rawValue)
+                .navigationTitle(self.category.rawValue + "s")
         }
     }
 }
