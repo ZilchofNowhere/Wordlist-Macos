@@ -211,13 +211,17 @@ struct EditWordView: View {
             else {
                 Section {
                     if word.imageData != nil, let image = NSImage(data: word.imageData!) {
-                        VStack(alignment: .center) {
-                            Text("Image")
-                            Image(nsImage: image)
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(height: 100)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        HStack {
+                            Spacer()
+                            VStack {
+                                Text("Image")
+                                Image(nsImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(height: 100)
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            Spacer()
                         }
                     }
                     LabeledContent("Word Type") { Text(word.type.rawValue) }
