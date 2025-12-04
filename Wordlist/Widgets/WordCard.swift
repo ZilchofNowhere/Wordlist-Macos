@@ -11,7 +11,7 @@ import SwiftData
 struct WordCard: View {
     @Environment(\.modelContext) private var modelContext
     var word: Word
-    var isSelected: Bool
+    var isSelected: Bool = false
     
     var body: some View {
         ZStack {
