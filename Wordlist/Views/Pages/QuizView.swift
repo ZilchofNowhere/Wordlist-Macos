@@ -8,85 +8,205 @@
 import SwiftUI
 import SwiftData
 import AppKit
+// Helpers will be added later
 
 struct QuizView: View {
     @Environment(\.modelContext) private var modelContext
     
     @State private var startedQuiz: Bool = false
+    @State private var showNextQuestion: Bool = false
+    @State private var showImages: Bool = true
+    @State private var showStats: Bool = false
     @State private var words: [Word] = [] // index 0 is the asked one, the rest will constitute the options
+    @State private var options: [Word] = []
+    @State private var chosenWord: Word? = nil
     @State private var wasCorrect: Bool? = nil
     @State private var score = 0
+    @State private var totalAnswered = 0
     @State private var fromGermanToEnglish: Bool = true
     
     var body: some View {
         ZStack {
             if !startedQuiz {
-                Button {
-                    words = getRandomWords()
-                    startedQuiz = true
-                } label: {
-                    Label("Start", systemImage: "play")
+                VStack(spacing: 30) {
+                    Text("Willkommen!")
+                        .font(.largeTitle)
+                    Toggle("Images are shown", isOn: $showImages)
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
+                    Button {
+                        words = getRandomWords()
+                        options = words.shuffled()
+                        startedQuiz = true
+                    } label: {
+                        Label("Start", systemImage: "play")
+                    }
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.extraLarge)
                 }
-                .buttonStyle(.glassProminent)
-                .controlSize(.extraLarge)
             }
             else {
-                // asked word
                 VStack {
+                    // asked word
+                    VStack {
+                        if let _ = words.first {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 6)
+                                    .fill(.clear)
+                                    .shadow(radius: 8)
+                                    .frame(width: 400, height: 120)
+
+                                HStack(spacing: 30) {
+                                    Text(askedWordText())
+                                        .font(.title2)
+
+                                    if let image = askedWordImage(), showImages {
+                                        Image(nsImage: image)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(height: 100)
+                                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                                    }
+                                }
+                            }
+                        }
+                    }
                     
-                }
-                
-                // options
-                VStack {
-                    ForEach(words[1...], id: \.self) { word in
+                    // options
+                    VStack {
+                        ForEach(options, id: \.self) { word in
+                            Text(optionText(for: word))
+                                .frame(width: 400, height: 40)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(answerBackground(word))
+                                        .shadow(radius: 4)
+                                )
+                                .animation(.default, value: chosenWord)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    chosenWord = word
+                                    showNextQuestion = true
+                                }
+                        }
+                    }
+                    .padding(.bottom, 10)
+                    HStack(spacing: 15) {
+                        Button {
+                            startedQuiz = false
+                            score = 0
+                            totalAnswered = 0
+                            chosenWord = nil
+                            wasCorrect = nil
+                            showNextQuestion = false
+                        } label: {
+                            Label("Restart", systemImage: "arrow.counterclockwise")
+                        }
                         
+                        Button {
+                            chosenWord = nil
+                            wasCorrect = nil
+                            words = getRandomWords()
+                            options = words.shuffled()
+                            showNextQuestion = false
+                        } label: {
+                            Label("Next question", systemImage: "arrow.forward.circle")
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(!showNextQuestion)
                     }
                 }
             }
         }
+        .onChange(of: chosenWord) { _, newValue in
+            guard let choice = newValue, let asked = words.first else { return }
+            if choice == asked {
+                wasCorrect = true
+                score += 1
+            } else {
+                wasCorrect = false
+            }
+            totalAnswered += 1
+        }
+        .sheet(isPresented: $showStats) {
+            StatsView(showStats: $showStats, score: $score, totalAnswered: $totalAnswered)
+        }
         .toolbar {
             ToolbarItem(placement: .status) {
-                Button {
+                Button() {
                     fromGermanToEnglish.toggle()
                 } label: {
-                    Image(nsImage: fromGermanToEnglish ? "🇩🇪 → 🇬🇧".emojiToImage()! : "🇬🇧 → 🇩🇪".emojiToImage()!)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 25)
+                    Label {
+                        Text("Switch languages")
+                    } icon: {
+                        Image(nsImage: fromGermanToEnglish ? "🇩🇪 → 🇬🇧".emojiToImage()! : "🇬🇧 → 🇩🇪".emojiToImage()!)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 25)
+                    }
+                }
+            }
+            
+            ToolbarItem(placement: .secondaryAction) {
+                Button {
+                    showStats = true
+                } label: {
+                    Label("Stats", systemImage: "chart.xyaxis.line")
                 }
             }
         }
     }
     
+    private func answerBackground(_ word: Word) -> Color {
+        if wasCorrect == nil {
+            return .clear
+        } else if wasCorrect == true && word == chosenWord {
+            return .green
+        } else if wasCorrect == false && word == chosenWord {
+            return .red
+        } else if wasCorrect == false && word == words[0] {
+            return .green
+        } else {
+            return .clear
+        }
+    }
+    
     private func getRandomWords() -> [Word] {
-        var randomWords: [Word] = []
-        var indices = Set<Int>()
+        let optionCount = 4
         do {
-            let descriptor = FetchDescriptor<Word>()
-            let count = try modelContext.fetchCount(descriptor)
-            
-            if count < 4 {
-                randomWords = try modelContext.fetch(descriptor)
+            let descriptor = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
+            let all = try modelContext.fetch(descriptor)
+            if all.isEmpty { return [] }
+            if all.count <= optionCount {
+                return all.shuffled()
             }
-            
-            for _ in 0..<4 {
-                indices.insert(Int.random(in: 0...count))
-            }
-            
-            for i in indices {
-                var desc = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
-                desc.fetchLimit = 1
-                desc.fetchOffset = i
-                
-                if let word = try modelContext.fetch(desc).first {
-                    randomWords.append(word)
+            var selected: [Word] = []
+            var used = Set<Int>()
+            while selected.count < optionCount {
+                let idx = Int.random(in: 0..<all.count)
+                if used.insert(idx).inserted {
+                    selected.append(all[idx])
                 }
             }
+            return selected
         } catch {
             print(error)
+            return []
         }
-        
-        return randomWords
+    }
+    
+    private func askedWordText() -> String {
+        guard let asked = words.first else { return "" }
+        return fromGermanToEnglish ? asked.german : asked.english
+    }
+
+    private func askedWordImage() -> NSImage? {
+        guard let data = words.first?.imageData, let image = NSImage(data: data) else { return nil }
+        return image
+    }
+
+    private func optionText(for word: Word) -> String {
+        return fromGermanToEnglish ? word.english : word.german
     }
 }
 
