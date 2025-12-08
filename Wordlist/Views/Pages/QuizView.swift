@@ -8,7 +8,6 @@
 import SwiftUI
 import SwiftData
 import AppKit
-// Helpers will be added later
 
 struct QuizView: View {
     @Environment(\.modelContext) private var modelContext
