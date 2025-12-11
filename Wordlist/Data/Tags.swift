@@ -43,6 +43,8 @@ enum VocabTag: String, CaseIterable, Identifiable, Hashable, Codable {
     case emotion = "Emotion and Personality"
     case travel = "Travel"
     case art = "Art"
+    case clothing = "Clothing"
+    case law = "Law"
     
     var id: Self { self }
 }

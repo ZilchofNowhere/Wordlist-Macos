@@ -15,10 +15,12 @@ struct TagCategoryView: View {
     
     @Query private var words: [Word]
     @Binding var selectedWordId: UUID?
+    @Binding var sortMode: SortMode
 
-    init(category: GrammaticalType, filterString: String, selectedWordId: Binding<UUID?>) {
+    init(category: GrammaticalType, filterString: String, selectedWordId: Binding<UUID?>, sortMode: Binding<SortMode>) {
         self.category = category
         _selectedWordId = selectedWordId
+        _sortMode = sortMode
         
         let predicate = #Predicate<Word> { word in
             if filterString.isEmpty {
@@ -31,7 +33,10 @@ struct TagCategoryView: View {
             }
         }
         
-        _words = Query(filter: predicate, sort: \Word.german)
+        _words = Query(filter: predicate, sort: [
+            sortMode.wrappedValue == .newerFirst ? SortDescriptor(\Word.timestamp, order: .reverse) : sortMode.wrappedValue == .olderFirst ? SortDescriptor(\Word.timestamp, order: .forward) : SortDescriptor(\Word.german, comparator: .localizedStandard),
+            SortDescriptor(\Word.german, comparator: .localizedStandard)
+        ])
     }
     
     var body: some View {

@@ -12,11 +12,13 @@ import SwiftData
 struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Binding var selectedWordId: UUID?
+    @Binding var sortMode: SortMode
     
     @Query private var words: [Word]
     
-    init(filterString: String, selectedWordId: Binding<UUID?>) {
+    init(filterString: String, selectedWordId: Binding<UUID?>, sortMode: Binding<SortMode>) {
         _selectedWordId = selectedWordId
+        _sortMode = sortMode
         
         let predicate = #Predicate<Word> { word in
             if filterString.isEmpty {
@@ -30,7 +32,8 @@ struct HomeView: View {
         }
         
         _words = Query(filter: predicate, sort: [
-            SortDescriptor(\Word.german, comparator: .localizedStandard)
+            sortMode.wrappedValue == .newerFirst ? SortDescriptor(\Word.timestamp, order: .reverse) : sortMode.wrappedValue == .olderFirst ? SortDescriptor(\Word.timestamp, order: .forward) : SortDescriptor(\Word.german, comparator: .localizedStandard),
+            SortDescriptor(\Word.german, comparator: .localizedStandard, order: .forward)
         ])
     }
     

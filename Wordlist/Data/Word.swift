@@ -17,6 +17,7 @@ final class Word: Identifiable {
     var vocabTag: [VocabTag]
     var notes: String?
     var exampleSentence: String?
+    var timestamp: Date
     @Attribute(.externalStorage) var imageData: Data?
     
     // noun
@@ -46,7 +47,7 @@ final class Word: Identifiable {
     // prep
     var nounCase: String?
     
-    init(german: String, english: String, type: GrammaticalType, vocabTag: [VocabTag] = [], notes: String? = nil, exampleSentence: String? = nil, gender: Gender? = nil, pluralForm: String? = nil, isRegular: Bool = true, isSeparable: Bool = false, present: String? = nil, imperfect: String? = nil, pastParticiple: String? = nil, auxiliary: String? = "haben", comparativeForm: String? = nil, nounCase: String? = nil, imageData: Data? = nil) {
+    init(german: String, english: String, type: GrammaticalType, vocabTag: [VocabTag] = [], notes: String? = nil, exampleSentence: String? = nil, gender: Gender? = nil, pluralForm: String? = nil, isRegular: Bool = true, isSeparable: Bool = false, present: String? = nil, imperfect: String? = nil, pastParticiple: String? = nil, auxiliary: String? = "haben", comparativeForm: String? = nil, nounCase: String? = nil, imageData: Data? = nil, timestamp: Date = Date()) {
         self.german = german
         self.english = english
         self.type = type
@@ -64,25 +65,26 @@ final class Word: Identifiable {
         self.exampleSentence = exampleSentence
         self.notes = notes
         self.imageData = imageData
+        self.timestamp = timestamp
     }
-        
+    
     func toCSV() -> String {
-        // schema: german,"english",type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,"exampleSentence","notes",vocabTag
+        // schema: timestamp,german,"english",type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,"exampleSentence","notes",vocabTag
         var tags = ""
         for tag in vocabTag {
             tags.append("\(tag.rawValue),")
         }
         return switch type {
             case .noun:
-                "\(german),\"\(english)\",\(type.rawValue),\(gender?.rawValue ?? ""),\(pluralForm ?? ""),,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),\(gender?.rawValue ?? ""),\(pluralForm ?? ""),,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
             case .verb:
-                "\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),\(isSeparable),\(present ?? ""),\(imperfect ?? ""),\(pastParticiple ?? ""),\(auxiliary ?? "haben"),,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),\(isSeparable),\(present ?? ""),\(imperfect ?? ""),\(pastParticiple ?? ""),\(auxiliary ?? "haben"),,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
             case .adjective:
-                "\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),,,,,,\(comparativeForm ?? ""),,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),,,,,,\(comparativeForm ?? ""),,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
             case .preposition:
-                "\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,\(nounCase ?? ""),\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,\(nounCase ?? ""),\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
             default:
-                "\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
         }
     }
 }

@@ -33,6 +33,12 @@ enum InspectorMode: Equatable {
     case editWord(Word)
 }
 
+enum SortMode: Equatable {
+    case alphabetical
+    case olderFirst
+    case newerFirst
+}
+
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var words: [Word]
@@ -44,6 +50,7 @@ struct ContentView: View {
     @State private var inspectorMode: InspectorMode = .none
     @State private var sidebarVisibility: NavigationSplitViewVisibility = .all
     @State private var wasSidebarOpen: Bool = false
+    @State private var sortMode = SortMode.alphabetical
 
     var body: some View {
         GeometryReader { geometry in
@@ -53,11 +60,11 @@ struct ContentView: View {
             } detail: {
                 switch selection {
                     case .home:
-                        HomeView(filterString: query, selectedWordId: $selectedWordId)
+                        HomeView(filterString: query, selectedWordId: $selectedWordId, sortMode: $sortMode)
                     case .type(let category):
-                        TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
+                        TagCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId, sortMode: $sortMode)
                     case .category(let category):
-                        VocabCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId)
+                        VocabCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId, sortMode: $sortMode)
                     case .quiz:
                         QuizView()
                     case .none:
@@ -160,6 +167,29 @@ struct ContentView: View {
                         }
                         .help("Toggle the sidebar")
                     }
+                    ToolbarItem(placement: .automatic) {
+                        Menu {
+                            Button {
+                                sortMode = .alphabetical
+                            } label: {
+                                Label("Alphabetical order", systemImage: sortMode == .alphabetical ? "checkmark" : "")
+                            }
+                            
+                            Button {
+                                sortMode = .newerFirst
+                            } label: {
+                                Label("Newer first", systemImage: sortMode == .newerFirst ? "checkmark" : "")
+                            }
+                            
+                            Button {
+                                sortMode = .olderFirst
+                            } label: {
+                                Label("Older first", systemImage: sortMode == .olderFirst ? "checkmark" : "")
+                            }
+                        } label: {
+                            Label("Sort By...", systemImage: "line.3.horizontal.decrease.circle")
+                        }
+                    }
                 }
             }
         }
@@ -170,7 +200,7 @@ struct ContentView: View {
             let descriptor = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
             let allWords = try modelContext.fetch(descriptor)
             
-            var resultStr = "german,english,type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,exampleSentence,notes,vocabTag\n"
+            var resultStr = "timestamp,german,english,type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,exampleSentence,notes,vocabTag\n"
             
             for word in allWords {
                 resultStr.append(word.toCSV() + "\n")
@@ -221,6 +251,7 @@ struct ContentView: View {
             
             for row in dataFrame.rows {
                 print(row)
+                let timestampStr = row["timestamp"] as? Double
                 let german = row["german"] as? String
                 let english = row["english"] as? String
                 let typeStr = row["type"] as? String
@@ -238,14 +269,15 @@ struct ContentView: View {
                 let notes = row["notes"] as? String
                 let tempTags = row["vocabTag"] as? String
 
+                let timestamp = Date(timeIntervalSince1970: timestampStr!)
                 let gender = genderStr == nil || genderStr!.isEmpty ? nil : Gender(rawValue: genderStr!)
                 let isRegular = isRegularStr == "true"
                 let isSeparable = isSeparableStr == "true"
-                let vocabTag: [VocabTag] = tempTags == nil || tempTags!.isEmpty ? [] : tempTags!.split(separator: ",", omittingEmptySubsequences: false).map { VocabTag.init(rawValue: String($0))! }
+                let vocabTag: [VocabTag] = tempTags == nil || tempTags!.isEmpty ? [] : tempTags!.split(separator: ",", omittingEmptySubsequences: true).map { VocabTag.init(rawValue: String($0))! }
                 
                 let type = GrammaticalType(rawValue: typeStr!)!
                 
-                let newWord = Word(german: german!, english: english!, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase)
+                let newWord = Word(german: german!, english: english!, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase, timestamp: timestamp)
                 
                 modelContext.insert(newWord)
             }

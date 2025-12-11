@@ -77,6 +77,8 @@ struct SidebarView: View {
             case .emotion: return "face.smiling"
             case .travel: return "airplane.up.right"
             case .art: return "paintpalette"
+            case .clothing: return "tshirt"
+            case .law: return "building.columns"
         }
     }
 }
