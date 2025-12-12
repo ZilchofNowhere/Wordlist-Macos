@@ -140,6 +140,7 @@ struct ContentView: View {
                             Image(systemName: "plus")
                         }
                         .help("Add a new word")
+                        .keyboardShortcut("N", modifiers: .command)
                     }
                     ToolbarItem(placement: .automatic) {
                         Button {
@@ -166,6 +167,7 @@ struct ContentView: View {
                             Image(systemName: "sidebar.right")
                         }
                         .help("Toggle the sidebar")
+                        .keyboardShortcut("I", modifiers: .command)
                     }
                     ToolbarItem(placement: .automatic) {
                         Menu {
