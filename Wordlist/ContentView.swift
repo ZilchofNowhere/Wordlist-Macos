@@ -200,7 +200,7 @@ struct ContentView: View {
             let descriptor = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
             let allWords = try modelContext.fetch(descriptor)
             
-            var resultStr = "timestamp,german,english,type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,exampleSentence,notes,vocabTag\n"
+            var resultStr = "timestamp,german,english,type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,exampleSentence,notes,vocabTag,imageData\n"
             
             for word in allWords {
                 resultStr.append(word.toCSV() + "\n")
@@ -268,16 +268,17 @@ struct ContentView: View {
                 let exampleSentence = row["exampleSentence"] as? String
                 let notes = row["notes"] as? String
                 let tempTags = row["vocabTag"] as? String
+                let imageDataStr = row["imageData"] as? String
 
                 let timestamp = Date(timeIntervalSince1970: timestampStr!)
                 let gender = genderStr == nil || genderStr!.isEmpty ? nil : Gender(rawValue: genderStr!)
                 let isRegular = isRegularStr == "true"
                 let isSeparable = isSeparableStr == "true"
                 let vocabTag: [VocabTag] = tempTags == nil || tempTags!.isEmpty ? [] : tempTags!.split(separator: ",", omittingEmptySubsequences: true).map { VocabTag.init(rawValue: String($0))! }
-                
+                let imageData = imageDataStr == nil || imageDataStr!.isEmpty ? nil : Data(base64Encoded: imageDataStr!)!
                 let type = GrammaticalType(rawValue: typeStr!)!
                 
-                let newWord = Word(german: german!, english: english!, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase, timestamp: timestamp)
+                let newWord = Word(german: german!, english: english!, type: type, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, comparativeForm: comparativeForm, nounCase: nounCase, imageData: imageData, timestamp: timestamp)
                 
                 modelContext.insert(newWord)
             }

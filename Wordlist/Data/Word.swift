@@ -69,22 +69,26 @@ final class Word: Identifiable {
     }
     
     func toCSV() -> String {
-        // schema: timestamp,german,"english",type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,"exampleSentence","notes",vocabTag
+        // schema: timestamp,german,"english",type,gender,pluralForm,isRegular,isSeparable,present,imperfect,pastParticiple,auxiliary,comparativeForm,nounCase,"exampleSentence","notes",vocabTag,imageData
         var tags = ""
+        var imgData = ""
         for tag in vocabTag {
             tags.append("\(tag.rawValue),")
         }
+        if let tempData = imageData {
+            imgData = imageData!.base64EncodedString()
+        }
         return switch type {
             case .noun:
-                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),\(gender?.rawValue ?? ""),\(pluralForm ?? ""),,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),\(gender?.rawValue ?? ""),\(pluralForm ?? ""),,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\",\(imgData)"
             case .verb:
-                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),\(isSeparable),\(present ?? ""),\(imperfect ?? ""),\(pastParticiple ?? ""),\(auxiliary ?? "haben"),,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),\(isSeparable),\(present ?? ""),\(imperfect ?? ""),\(pastParticiple ?? ""),\(auxiliary ?? "haben"),,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\",\(imgData)"
             case .adjective:
-                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),,,,,,\(comparativeForm ?? ""),,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,\(isRegular),,,,,,\(comparativeForm ?? ""),,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\",\(imgData)"
             case .preposition:
-                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,\(nounCase ?? ""),\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,\(nounCase ?? ""),\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\",\(imgData)"
             default:
-                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\""
+                "\(timestamp),\(german),\"\(english)\",\(type.rawValue),,,,,,,,,,,\"\(exampleSentence ?? "")\",\"\(notes ?? "")\",\"\(tags)\",\(imgData)"
         }
     }
 }
