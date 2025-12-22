@@ -22,6 +22,9 @@ struct SidebarView: View {
                 NavigationLink(value: SidebarItem.quiz) {
                     Label("Quiz", systemImage: "graduationcap")
                 }
+                NavigationLink(value: SidebarItem.manageTags) {
+                    Label("Manage Tags", systemImage: "tag.circle")
+                }
             }
 
             // TAGS SECTION
@@ -79,6 +82,24 @@ struct SidebarView: View {
             case .art: return "paintpalette"
             case .clothing: return "tshirt"
             case .law: return "building.columns"
+        }
+    }
+}
+
+enum SidebarItem: Hashable, Identifiable {
+    case home
+    case type(GrammaticalType)
+    case category(VocabTag)
+    case quiz
+    case manageTags
+    
+    var id: String {
+        switch self {
+            case .home: return "home"
+            case .type(let cat): return cat.rawValue
+            case .category(let cat): return cat.rawValue
+            case .quiz: return "quiz"
+            case .manageTags: return "manageTags"
         }
     }
 }

@@ -76,7 +76,7 @@ final class Word: Identifiable {
             tags.append("\(tag.rawValue),")
         }
         if let tempData = imageData {
-            imgData = imageData!.base64EncodedString()
+            imgData = tempData.base64EncodedString()
         }
         return switch type {
             case .noun:

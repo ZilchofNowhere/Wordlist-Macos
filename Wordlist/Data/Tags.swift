@@ -48,3 +48,23 @@ enum VocabTag: String, CaseIterable, Identifiable, Hashable, Codable {
     
     var id: Self { self }
 }
+
+var allVocabTags: [VocabularyTag] = [
+    .init(name: "Animal", icon: "pawprint"),
+    .init(name: "Food", icon: "fork.knife"),
+    .init(name: "Sport", icon: "soccerball.inverse"),
+    .init(name: "School", icon: "book"),
+    .init(name: "Technology", icon: "bolt"),
+    .init(name: "Plant", icon: "leaf"),
+    .init(name: "House", icon: "house"),
+    .init(name: "Health", icon: "stethoscope"),
+    .init(name: "City", icon: "building.2"),
+    .init(name: "Family", icon: "figure.2.and.child.holdinghands"),
+    .init(name: "Job", icon: "briefcase"),
+    .init(name: "Science", icon: "flask"),
+    .init(name: "Emotion and Personality", icon: "face.smiling"),
+    .init(name: "Travel", icon: "airplane.up.right"),
+    .init(name: "Art", icon: "paintpalette"),
+    .init(name: "Clothing", icon: "tshirt"),
+    .init(name: "Law", icon: "building.columns")
+]

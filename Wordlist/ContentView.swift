@@ -11,22 +11,6 @@ import UniformTypeIdentifiers
 import TabularData
 
 
-enum SidebarItem: Hashable, Identifiable {
-    case home
-    case type(GrammaticalType)
-    case category(VocabTag)
-    case quiz
-
-    var id: String {
-        switch self {
-            case .home: return "home"
-            case .type(let cat): return cat.rawValue
-            case .category(let cat): return cat.rawValue
-            case .quiz: return "quiz"
-        }
-    }
-}
-
 enum InspectorMode: Equatable {
     case none
     case addWord
@@ -50,7 +34,7 @@ struct ContentView: View {
     @State private var inspectorMode: InspectorMode = .none
     @State private var sidebarVisibility: NavigationSplitViewVisibility = .all
     @State private var wasSidebarOpen: Bool = false
-    @State private var sortMode = SortMode.alphabetical
+    @State private var sortMode = SortMode.newerFirst
 
     var body: some View {
         GeometryReader { geometry in
@@ -67,6 +51,8 @@ struct ContentView: View {
                         VocabCategoryView(category: category, filterString: query, selectedWordId: $selectedWordId, sortMode: $sortMode)
                     case .quiz:
                         QuizView()
+                    case .manageTags:
+                        ManageTagsView()
                     case .none:
                         Text("Select a page")
                 }
@@ -98,7 +84,7 @@ struct ContentView: View {
                 }
             }
             .onChange(of: selection) { _, newValue in
-                if newValue == .quiz {
+                if newValue == .quiz || newValue == .manageTags {
                     inspectorMode = .none
                 }
             }
@@ -128,7 +114,7 @@ struct ContentView: View {
                 }
             }
             .toolbar {
-                if selection != .quiz {
+                if selection != .quiz && selection != .manageTags {
                     ToolbarItem(placement: .automatic) {
                         Button {
                             if (inspectorMode != .addWord) {

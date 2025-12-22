@@ -15,7 +15,7 @@ struct WordlistApp: App {
             ContentView()
                 .frame(minWidth: 540)
         }
-        .modelContainer(for: Word.self)
+        .modelContainer(for: [Word.self, VocabularyTag.self])
         .commands {
             CommandGroup(replacing: .importExport) {
                 Button {

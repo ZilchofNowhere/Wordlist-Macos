@@ -193,15 +193,15 @@ struct AddWordView: View {
             Section {
                 Button("Add Word") {
                     if (wordType == .noun) {
-                        modelContext.insert(Word(german: german.capitalized, english: english, type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm.capitalized, imageData: imageData))
+                        modelContext.insert(Word(german: german.capitalized.trimmingCharacters(in: .whitespacesAndNewlines), english: english.trimmingCharacters(in: .whitespacesAndNewlines), type: .noun, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, gender: gender, pluralForm: pluralForm.capitalized, imageData: imageData))
                     } else if (wordType == .verb) {
-                        modelContext.insert(Word(german: german, english: english, type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, imageData: imageData))
+                        modelContext.insert(Word(german: german.trimmingCharacters(in: .whitespacesAndNewlines), english: english.trimmingCharacters(in: .whitespacesAndNewlines), type: .verb, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, isSeparable: isSeparable, present: present, imperfect: imperfect, pastParticiple: pastParticiple, auxiliary: auxiliary, imageData: imageData))
                     } else if (wordType == .adjective) {
-                        modelContext.insert(Word(german: german, english: english, type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative, imageData: imageData))
+                        modelContext.insert(Word(german: german.trimmingCharacters(in: .whitespacesAndNewlines), english: english.trimmingCharacters(in: .whitespacesAndNewlines), type: .adjective, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, isRegular: isRegular, comparativeForm: comparative, imageData: imageData))
                     } else if (wordType == .preposition) {
-                        modelContext.insert(Word(german: german, english: english, type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase, imageData: imageData))
+                        modelContext.insert(Word(german: german.trimmingCharacters(in: .whitespacesAndNewlines), english: english.trimmingCharacters(in: .whitespacesAndNewlines), type: .preposition, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, nounCase: nounCase, imageData: imageData))
                     } else {
-                        modelContext.insert(Word(german: german, english: english, type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, imageData: imageData))
+                        modelContext.insert(Word(german: german.trimmingCharacters(in: .whitespacesAndNewlines), english: english.trimmingCharacters(in: .whitespacesAndNewlines), type: wordType, vocabTag: vocabTag, notes: notes, exampleSentence: exampleSentence, imageData: imageData))
                     }
                     
                     german = ""
