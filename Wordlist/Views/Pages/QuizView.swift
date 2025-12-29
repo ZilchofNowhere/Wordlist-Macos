@@ -23,6 +23,7 @@ struct QuizView: View {
     @State private var score = 0
     @State private var totalAnswered = 0
     @State private var fromGermanToEnglish: Bool = true
+    @State private var askedWords: [Word] = []
     
     var body: some View {
         ZStack {
@@ -98,11 +99,15 @@ struct QuizView: View {
                             chosenWord = nil
                             wasCorrect = nil
                             showNextQuestion = false
+                            askedWords = []
                         } label: {
                             Label("Restart", systemImage: "arrow.counterclockwise")
                         }
                         
                         Button {
+                            if wasCorrect == true {
+                                askedWords.append(words.first!)
+                            }
                             chosenWord = nil
                             wasCorrect = nil
                             words = getRandomWords()
@@ -174,7 +179,8 @@ struct QuizView: View {
         let optionCount = 4
         do {
             let descriptor = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
-            let all = try modelContext.fetch(descriptor)
+            var all = try modelContext.fetch(descriptor)
+            all.removeAll(where: {askedWords.contains($0)}, )
             if all.isEmpty { return [] }
             if all.count <= optionCount {
                 return all.shuffled()
