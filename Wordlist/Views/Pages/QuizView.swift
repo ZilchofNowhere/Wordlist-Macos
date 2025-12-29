@@ -180,7 +180,7 @@ struct QuizView: View {
         do {
             let descriptor = FetchDescriptor<Word>(sortBy: [SortDescriptor(\.german)])
             var all = try modelContext.fetch(descriptor)
-            all.removeAll(where: {askedWords.contains($0)}, )
+            all.removeAll(where: {askedWords.contains($0)})
             if all.isEmpty { return [] }
             if all.count <= optionCount {
                 return all.shuffled()
